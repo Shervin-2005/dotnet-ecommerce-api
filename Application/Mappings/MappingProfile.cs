@@ -22,6 +22,11 @@ namespace Application.Mappings
             CreateMap<Brand, BrandDto>();
             CreateMap<CreateBrandDto, Brand>();
             CreateMap<UpdateBrandDto, Brand>();
+
+            // Category
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CreateCategoryDto, Category>();
+            CreateMap<UpdateCategoryDto, Category>();
         }
     }
 }

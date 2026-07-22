@@ -17,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
 builder.Services.AddScoped<IProductService, ProductService>();
