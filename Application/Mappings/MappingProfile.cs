@@ -8,6 +8,7 @@ namespace Application.Mappings
     {
         public MappingProfile()
         {
+            // Product
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.CategoryName,
                     opt => opt.MapFrom(src => src.Category != null ? src.Category.CategoryName : null))
@@ -16,6 +17,11 @@ namespace Application.Mappings
 
             CreateMap<CreateProductDto, Product>();
             CreateMap<UpdateProductDto, Product>();
+
+            // Brand
+            CreateMap<Brand, BrandDto>();
+            CreateMap<CreateBrandDto, Brand>();
+            CreateMap<UpdateBrandDto, Brand>();
         }
     }
 }

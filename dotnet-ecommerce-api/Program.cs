@@ -16,6 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
+
 builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
 builder.Services.AddScoped<IProductService, ProductService>();
 

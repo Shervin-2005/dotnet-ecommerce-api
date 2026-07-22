@@ -8,6 +8,7 @@ namespace Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
         private IProductRepository? _products;
+        IBrandRepository? _brands;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -15,6 +16,7 @@ namespace Infrastructure.Repositories
         }
 
         public IProductRepository Products => _products ??= new ProductRepository(_context);
+        public IBrandRepository Brands => _brands ??= new BrandRepository(_context);
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 
