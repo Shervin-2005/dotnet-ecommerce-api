@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Services;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,10 @@ var connectionString =
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
