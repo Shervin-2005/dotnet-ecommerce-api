@@ -1,7 +1,11 @@
+using Amazon.S3;
 using Application.Interfaces;
 using Application.Services;
+using Infastructure.Services;
+using Infastructure.Settings;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +27,21 @@ builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
 builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+builder.Configuration.AddUserSecrets<Program>();
+
+builder.Services.Configure<S3Settings>(
+    builder.Configuration.GetSection("ArvanStorage")
+);
+
+builder.Services.Configure<S3Settings>(
+    builder.Configuration.GetSection("OTPOptions")
+);
+
+builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+
+builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
 
 builder.Services.AddControllers();
 

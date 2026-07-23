@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>dotnet_ecommerce_api</RootNamespace>
+    <UserSecretsId>84e402cd-72f3-4b10-836e-e27d06d0cf9a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
