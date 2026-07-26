@@ -9,19 +9,43 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageStorageService _imageStorageService;
 
-        public BrandService(IUnitOfWork unitOfWork, IMapper mapper)
+        public BrandService(IUnitOfWork unitOfWork, IMapper mapper, IImageStorageService imageStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageStorageService = imageStorageService;
         }
 
         public async Task<BrandDto> CreateAsync(CreateBrandDto dto)
         {
-            var brand = _mapper.Map<Brand>(dto);
-            await _unitOfWork.Brands.AddAsync(brand);
-            await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<BrandDto>(brand);
+            string imageUrl = "";
+            try
+            {
+                var brand = _mapper.Map<Brand>(dto);
+
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"main{extension}";
+
+                var folderId = Guid.NewGuid();
+                brand.ImageFolderId = folderId;
+                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Brands/{folderId}/images",
+                                                                  imageName, dto.ContentType);
+                brand.MainImageUrl = imageUrl;
+
+                await _unitOfWork.Brands.AddAsync(brand);
+                await _unitOfWork.SaveChangesAsync();
+                return _mapper.Map<BrandDto>(brand);
+            }
+            catch (Exception)
+            {
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    await _imageStorageService.DeleteAsync(imageUrl);
+                }
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -29,9 +53,19 @@ namespace Application.Services
             var brand = await _unitOfWork.Brands.GetByIdAsync(id);
             if (brand is null) return false;
 
-            _unitOfWork.Brands.Delete(brand);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            try
+            {
+                await _imageStorageService.DeleteAsync(brand.MainImageUrl);
+
+                _unitOfWork.Brands.Delete(brand);
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+
+                throw;
+            }    
         }
 
         public async Task<IEnumerable<BrandDto>> GetAllAsync()
@@ -48,13 +82,41 @@ namespace Application.Services
 
         public async Task<bool> UpdateAsync(int id, UpdateBrandDto dto)
         {
-            var brand = await _unitOfWork.Brands.GetByIdAsync(id);
-            if (brand is null) return false;
+            string imageUrl = "";
+            try
+            {
+                var brand = await _unitOfWork.Brands.GetByIdAsync(id);
+                if (brand is null) return false;
 
-            _mapper.Map(dto, brand);
-            _unitOfWork.Brands.Update(brand);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+                var oldImageUrl = brand.MainImageUrl;
+
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"main{extension}";
+
+                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Brands/{brand.ImageFolderId}/images",
+                                                                      imageName, dto.ContentType);
+                brand.MainImageUrl = imageUrl;
+
+                _mapper.Map(dto, brand);
+                _unitOfWork.Brands.Update(brand);
+                await _unitOfWork.SaveChangesAsync();
+
+                if (!string.Equals(oldImageUrl, imageUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _imageStorageService.DeleteAsync(oldImageUrl);
+                }
+
+                return true;
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    await _imageStorageService.DeleteAsync(imageUrl);
+                }
+                throw;
+            }
+            
         }
     }
 }
