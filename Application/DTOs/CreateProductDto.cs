@@ -18,5 +18,7 @@ namespace Application.DTOs
 
         public int CategoryId { get; set; }
         public int BrandId { get; set; }
+
+        public List<ProductImageUploadDto> Images { get; set; } = [];
     }
 }
