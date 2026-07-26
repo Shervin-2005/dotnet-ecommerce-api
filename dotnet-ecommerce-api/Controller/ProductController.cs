@@ -77,8 +77,49 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, UpdateProductDto dto)
+        public async Task<IActionResult> Update(int id, ProductRequest request)
         {
+            if (request.Images.Count == 0)
+                return BadRequest("At least one image is required");
+
+            const long maxSizeBytes = 5 * 1024 * 1024; //5MB
+
+            var allowedTypes = new[]
+            {
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            };
+
+            var dto = new UpdateProductDto
+            {
+                ProductName = request.ProductName,
+                Price = request.Price,
+                Description = request.Description,
+                StockQuantity = request.StockQuantity,
+                CategoryId = request.CategoryId,
+                BrandId = request.BrandId
+            };
+
+            foreach (var file in request.Images)
+            {
+                if (file.Length == 0)
+                    return BadRequest("One of the images is empty.");
+
+                if (file.Length > maxSizeBytes)
+                    return BadRequest($"'{file.FileName}' exceeds 5 MB.");
+
+                if (!allowedTypes.Contains(file.ContentType))
+                    return BadRequest($"'{file.FileName}' has an unsupported format.");
+
+                dto.Images.Add(new ProductImageUploadDto
+                {
+                    Image = file.OpenReadStream(),
+                    ImageName = file.FileName,
+                    ContentType = file.ContentType
+                });
+            }
+
             var updated = await _productService.UpdateAsync(id, dto);
             if (!updated) return NotFound();
             return NoContent();
