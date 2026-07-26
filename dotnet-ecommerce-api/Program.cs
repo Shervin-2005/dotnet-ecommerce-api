@@ -5,7 +5,6 @@ using Infastructure.Services;
 using Infastructure.Settings;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,14 +21,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
 
 builder.Services.AddAutoMapper(typeof(Application.Mappings.MappingProfile));
-builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-
-builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services.Configure<S3Settings>(
     builder.Configuration.GetSection("ArvanStorage")
@@ -39,9 +35,25 @@ builder.Services.Configure<S3Settings>(
     builder.Configuration.GetSection("OTPOptions")
 );
 
-builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var settings = sp.GetRequiredService<
+        Microsoft.Extensions.Options.IOptions<S3Settings>>().Value;
+    Console.WriteLine($"ServiceUrl: '{settings.ServiceUrl}'");
+    Console.WriteLine($"AccessKey: '{settings.AccessKey}'");
+    Console.WriteLine($"BucketName: '{settings.BucketName}'");
+    var credentials = new Amazon.Runtime.BasicAWSCredentials(
+        settings.AccessKey,
+        settings.SecretKey);
 
-builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
+    var config = new AmazonS3Config
+    {
+        ServiceURL = settings.ServiceUrl,
+        ForcePathStyle = true
+    };
+
+    return new AmazonS3Client(credentials, config);
+});
 
 builder.Services.AddControllers();
 

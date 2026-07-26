@@ -10,13 +10,6 @@ namespace Infastructure.Services
     {
         private readonly IAmazonS3 _s3Client;
         private readonly S3Settings _s3Settings;
-        private static class Folders
-        {
-            public const string CategoryImage = "categories/{0}/image/";
-            public const string BrandImage = "brands/{0}/image/";
-            public const string ProductImages = "products/{0}/images/";
-            public const string UserProfileImage = "users/{0}/ProfileImage/";
-        }
 
         public S3ImageStorageService(IAmazonS3 s3Client, IOptions<S3Settings> options)
         {
@@ -24,29 +17,41 @@ namespace Infastructure.Services
             _s3Settings = options.Value;
         }
 
-        public async Task<string> UploadAsync(Stream fileStream, string folder, string fileName)
+        public async Task<string> UploadAsync(Stream fileStream, string folder, string fileName, string contentType)
         {
+            try
+            {
+                string objectKey = $"{folder}/{fileName}";
+                var putRequest = new PutObjectRequest
+                {
+                    BucketName = _s3Settings.BucketName,
+                    Key = objectKey,
+                    InputStream = fileStream,
+                    ContentType = contentType,
+                    CannedACL = S3CannedACL.PublicRead
+                };
+                await _s3Client.PutObjectAsync(putRequest);
 
-            string objectKey = $"{folder}{fileName}";
+                return $"{_s3Settings.ServiceUrl}/{_s3Settings.BucketName}/{objectKey}";
+            }
+            catch
+            {
+                //later would alter with proper error handilng with timeout exception and ass exception for dev env
+                throw new Exception("something went wrong");
+            }           
+        }
 
-            var putRequest = new PutObjectRequest
+        public async Task DeleteAsync(string fileUrl)
+        {
+            var uri = new Uri(fileUrl);
+
+            var key = uri.AbsolutePath.TrimStart('/')[(_s3Settings.BucketName.Length + 1)..];
+
+            await _s3Client.DeleteObjectAsync(new DeleteObjectRequest
             {
                 BucketName = _s3Settings.BucketName,
-                Key = objectKey,
-                InputStream = fileStream,
-                CannedACL = S3CannedACL.PublicRead
-            };
-            await _s3Client.PutObjectAsync(putRequest);
-
-            return $"{_s3Settings.ServiceURL}/{_s3Settings.BucketName}/{objectKey}";
+                Key = key
+            });
         }
-
-        public Task DeleteAsync(string fileUrl)
-        {
-            throw new NotImplementedException();
-        }
-
-        //public Task<string> SaveUserProfileImageAsync(Stream fileStream, int userId)
-        //    => UploadAsync(fileStream, string.Format(Folders.UserProfileImage, userId));
     }
 }

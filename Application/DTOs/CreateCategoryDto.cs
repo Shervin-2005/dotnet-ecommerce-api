@@ -7,7 +7,13 @@ namespace Application.DTOs
         [Required, StringLength(150)]
         public string CategoryName { get; set; } = null!;
 
-        [Required, StringLength(500)]
-        public string MainImageUrl { get; set; } = null!;
+        [Required]
+        public Stream Image {  get; set; }= default!;
+
+        [Required]
+        public string ImageName { get; set; } = null!;
+
+        [Required]
+        public string ContentType { get; set; } = null!;
     }
 }

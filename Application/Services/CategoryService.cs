@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using System.Net.Mime;
 
 namespace Application.Services
 {
@@ -9,28 +10,64 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageStorageService _imageStorageService;
 
-        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper)
+        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper, IImageStorageService imageStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageStorageService = imageStorageService;
         }
         public async Task<CategoryDto> CreateAsync(CreateCategoryDto dto)
         {
-            var category = _mapper.Map<Category>(dto);
-            await _unitOfWork.Categories.AddAsync(category);
-            await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<CategoryDto>(category);
+            string imageUrl = "";
+            try
+            {
+                var category = _mapper.Map<Category>(dto);
+
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"main{extension}";
+
+                var folderId = Guid.NewGuid();
+                category.ImageFolderId = folderId;
+                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Categories/{folderId}/images",
+                                                                  imageName, dto.ContentType);
+                category.MainImageUrl = imageUrl;
+                await _unitOfWork.Categories.AddAsync(category);
+                await _unitOfWork.SaveChangesAsync();
+                return _mapper.Map<CategoryDto>(category);
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    await _imageStorageService.DeleteAsync(imageUrl);
+                }
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
-            if (category is null) return false;
 
-            _unitOfWork.Categories.Delete(category);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            if (category is null)
+                return false;
+
+            try
+            {
+                await _imageStorageService.DeleteAsync(category.MainImageUrl);
+
+                _unitOfWork.Categories.Delete(category);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<CategoryDto>> GetAllAsync()
@@ -47,13 +84,33 @@ namespace Application.Services
 
         public async Task<bool> UpdateAsync(int id, UpdateCategoryDto dto)
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
-            if (category is null) return false;
+            string imageUrl = "";
+            try
+            {
+                var category = await _unitOfWork.Categories.GetByIdAsync(id);
+                if (category is null) return false;
 
-            _mapper.Map(dto, category);
-            _unitOfWork.Categories.Update(category);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"main{extension}";
+
+                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Categories/{category.ImageFolderId}/images",
+                                                                      imageName, dto.ContentType);
+                category.MainImageUrl = imageUrl;
+
+                _mapper.Map(dto, category);
+                _unitOfWork.Categories.Update(category);
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(imageUrl))
+                {
+                    await _imageStorageService.DeleteAsync(imageUrl);
+                }
+                throw;
+            }
+           
         }
     }
 }
