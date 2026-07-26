@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller
@@ -29,8 +30,48 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create(CreateProductDto dto)
+        public async Task<ActionResult<ProductDto>> Create([FromForm]ProductRequest request)
         {
+            if (request.Images.Count == 0)
+                return BadRequest("At least one image is required");
+
+            const long maxSizeBytes = 5 * 1024 * 1024; //5MB
+
+            var allowedTypes = new[]
+            {
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            };
+
+            var dto = new CreateProductDto
+            {
+                ProductName = request.ProductName,
+                Price = request.Price,
+                Description = request.Description,
+                StockQuantity = request.StockQuantity,
+                CategoryId = request.CategoryId,
+                BrandId = request.BrandId
+            };
+
+            foreach (var file in request.Images)
+            {
+                if (file.Length == 0)
+                    return BadRequest("One of the images is empty.");
+
+                if (file.Length > maxSizeBytes)
+                    return BadRequest($"'{file.FileName}' exceeds 5 MB.");
+
+                if (!allowedTypes.Contains(file.ContentType))
+                    return BadRequest($"'{file.FileName}' has an unsupported format.");
+
+                dto.Images.Add(new ProductImageUploadDto
+                {
+                    Image = file.OpenReadStream(),
+                    ImageName = file.FileName,
+                    ContentType = file.ContentType
+                });
+            }
             var created = await _productService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.ProductId }, created);
         }
