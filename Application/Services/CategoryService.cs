@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
-using System.Net.Mime;
 
 namespace Application.Services
 {
@@ -88,7 +87,10 @@ namespace Application.Services
             try
             {
                 var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
                 if (category is null) return false;
+
+                await _imageStorageService.DeleteAsync(category.MainImageUrl);
 
                 var extension = Path.GetExtension(dto.ImageName);
                 var imageName = $"main{extension}";
