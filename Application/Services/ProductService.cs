@@ -9,19 +9,65 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageStorageService _imageStorageService;
 
-        public ProductService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper, IImageStorageService imageStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageStorageService = imageStorageService;
         }
 
         public async Task<ProductDto> CreateAsync(CreateProductDto dto)
         {
-            var product = _mapper.Map<Product>(dto);
-            await _unitOfWork.Products.AddAsync(product);
-            await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<ProductDto>(product);
+            var ImageUrls = new List<string>();
+
+            try
+            {
+                var product = _mapper.Map<Product>(dto);
+
+                product.ImageFolderId = Guid.NewGuid();
+                int displayOrder = 1;
+
+                foreach (var image in dto.Images)
+                {
+                    var extension = Path.GetExtension(image.ImageName);
+
+                    var fileName = $"{displayOrder}{extension}";
+
+                    var imageUrl = await _imageStorageService.UploadAsync(
+                        image.Image,
+                        $"Products/{product.ImageFolderId}",
+                        fileName,
+                        image.ContentType);
+
+                    ImageUrls.Add(imageUrl);
+
+                    product.Images.Add(new ProductImage
+                    {
+                        ImageUrl = imageUrl,
+                        IsMain = displayOrder == 1,
+                        DisplayOrder = displayOrder
+                    });
+
+                    displayOrder++;
+                }
+                await _unitOfWork.Products.AddAsync(product);
+
+                await _unitOfWork.SaveChangesAsync();
+                
+                return _mapper.Map<ProductDto>(product);
+            }
+            catch
+            {
+                foreach (var imageUrl in ImageUrls)
+                {
+                    await _imageStorageService.DeleteAsync(imageUrl);
+
+                }
+
+                throw;
+            } 
         }
 
         public async Task<bool> DeleteAsync(int id)
