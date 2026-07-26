@@ -30,6 +30,9 @@ namespace Infastructure.Configurations
                 .IsRequired()
                 .HasDefaultValue(0);
 
+            builder.Property(p => p.ImageFolderId)
+                .IsRequired();
+
             builder.HasOne(p => p.Category)
                .WithMany(c => c.Products)
                .HasForeignKey(p => p.CategoryId)

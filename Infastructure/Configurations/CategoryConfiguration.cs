@@ -17,6 +17,10 @@ namespace Infrastructure.Configurations
             builder.Property(c => c.MainImageUrl)
                 .IsRequired()
                 .HasMaxLength(500);
+
+            builder.Property(c => c.ImageFolderId)
+                .IsRequired()
+                .HasMaxLength(500);
         }
     }
 }
