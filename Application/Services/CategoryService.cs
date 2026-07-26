@@ -86,22 +86,30 @@ namespace Application.Services
             string imageUrl = "";
             try
             {
+
                 var category = await _unitOfWork.Categories.GetByIdAsync(id);
 
                 if (category is null) return false;
 
-                await _imageStorageService.DeleteAsync(category.MainImageUrl);
+                var oldImageUrl = category.MainImageUrl;
 
                 var extension = Path.GetExtension(dto.ImageName);
                 var imageName = $"main{extension}";
 
                 imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Categories/{category.ImageFolderId}/images",
                                                                       imageName, dto.ContentType);
+
                 category.MainImageUrl = imageUrl;
 
                 _mapper.Map(dto, category);
                 _unitOfWork.Categories.Update(category);
                 await _unitOfWork.SaveChangesAsync();
+
+                if (!string.Equals(oldImageUrl, imageUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _imageStorageService.DeleteAsync(oldImageUrl);
+                }
+
                 return true;
             }
             catch
