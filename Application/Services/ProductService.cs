@@ -72,12 +72,25 @@ namespace Application.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
             if (product is null) return false;
 
-            _unitOfWork.Products.Delete(product);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            try
+            {
+                foreach(var image in product.Images)
+                {
+                    await _imageStorageService.DeleteAsync(image.ImageUrl);
+                }
+
+                _unitOfWork.Products.Delete(product);
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllAsync()
@@ -102,5 +115,117 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
+       
+        public async Task<bool> AddImageAsync(int id, ProductImageDto dto)
+        {
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
+            if (product is null) return false;
+
+            string? imageUrl = null;
+            try
+            {
+                await using var image = dto.Image;
+
+                var targetOrder = Math.Clamp(dto.DisplayOrder, 0, product.Images.Count);
+                foreach (var existing in product.Images.Where(i => i.DisplayOrder >= targetOrder))
+                    existing.DisplayOrder += 1;
+
+                var folderId = product.ImageFolderId;
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"{Guid.NewGuid()}{extension}";
+
+                imageUrl = await _imageStorageService.UploadAsync(
+                    image, $"Products/{product.ImageFolderId}", imageName, dto.ContentType);
+
+                // Only one image can be main
+                if (dto.IsMain)
+                {
+                    foreach (var existing in product.Images)
+                        existing.IsMain = false;
+                }
+
+                var productImage = new ProductImage
+                {
+                    ProductId = product.ProductId,
+                    ImageUrl = imageUrl,
+                    IsMain = dto.IsMain,
+                    DisplayOrder = dto.DisplayOrder
+                };
+
+                await _unitOfWork.ProductImages.AddAsync(productImage);
+                await _unitOfWork.SaveChangesAsync();
+
+                _mapper.Map<ProductImageDto>(productImage);
+
+                return true;
+            }
+            catch
+            {
+                // Upload succeeded but the DB write failed — don't leave an orphaned file in S3.
+                if (!string.IsNullOrEmpty(imageUrl))
+                    await _imageStorageService.DeleteAsync(imageUrl);
+                throw;
+            }
+        }
+        public async Task<bool> RemoveImageAsync(int productId, int imageId)
+        {
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(productId);
+            if (product is null) return false;
+
+            var image = product.Images.FirstOrDefault(i => i.ImageId == imageId);
+            if (image is null) return false;
+
+            var removedOrder = image.DisplayOrder;
+
+            var wasMain = image.IsMain;
+            var deletedUrl = image.ImageUrl;
+
+            _unitOfWork.ProductImages.Delete(image);
+
+            foreach (var remaining in product.Images.Where(i => i.ImageId != imageId && i.DisplayOrder > removedOrder))
+                 remaining.DisplayOrder -= 1;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            try
+            {
+                await _imageStorageService.DeleteAsync(deletedUrl);
+            }
+            catch
+            {
+                throw;
+            }
+
+            if (wasMain)
+            {
+                var nextMain = product.Images
+                    .Where(i => i.ImageId != imageId)
+                    .OrderBy(i => i.DisplayOrder)
+                    .FirstOrDefault();
+
+                if (nextMain is not null)
+                {
+                    nextMain.IsMain = true;
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+
+            return true;
+        }
+        public async Task<bool> SetMainImageAsync(int productId, int imageId)
+        {
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(productId);
+            if (product is null) return false;
+
+            var target = product.Images.FirstOrDefault(i => i.ImageId == imageId);
+            if (target is null) return false;
+
+            foreach (var image in product.Images)
+                image.IsMain = image.ImageId == imageId;
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

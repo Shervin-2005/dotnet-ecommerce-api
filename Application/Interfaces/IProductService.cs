@@ -9,5 +9,8 @@ namespace Application.Interfaces
         Task<ProductDto> CreateAsync(CreateProductDto dto);
         Task<bool> UpdateAsync(int id, UpdateProductDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<bool> AddImageAsync(int id, ProductImageDto dto);
+        Task<bool> RemoveImageAsync(int productId, int imageId);
+        Task<bool> SetMainImageAsync(int productId, int imageId);
     }
 }

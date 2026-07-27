@@ -18,6 +18,7 @@ namespace Infastructure.Repositories
             await _dbSet
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
+            .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
     }
 }

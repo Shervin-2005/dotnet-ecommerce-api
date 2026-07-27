@@ -65,7 +65,7 @@ namespace dotnet_ecommerce_api.Controller
                 if (!allowedTypes.Contains(file.ContentType))
                     return BadRequest($"'{file.FileName}' has an unsupported format.");
 
-                dto.Images.Add(new ProductImageUploadDto
+                dto.Images.Add(new ProductImageDto
                 {
                     Image = file.OpenReadStream(),
                     ImageName = file.FileName,
@@ -77,49 +77,8 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, ProductRequest request)
+        public async Task<IActionResult> Update(int id, UpdateProductDto dto)
         {
-            if (request.Images.Count == 0)
-                return BadRequest("At least one image is required");
-
-            const long maxSizeBytes = 5 * 1024 * 1024; //5MB
-
-            var allowedTypes = new[]
-            {
-                "image/jpeg",
-                "image/png",
-                "image/webp"
-            };
-
-            var dto = new UpdateProductDto
-            {
-                ProductName = request.ProductName,
-                Price = request.Price,
-                Description = request.Description,
-                StockQuantity = request.StockQuantity,
-                CategoryId = request.CategoryId,
-                BrandId = request.BrandId
-            };
-
-            foreach (var file in request.Images)
-            {
-                if (file.Length == 0)
-                    return BadRequest("One of the images is empty.");
-
-                if (file.Length > maxSizeBytes)
-                    return BadRequest($"'{file.FileName}' exceeds 5 MB.");
-
-                if (!allowedTypes.Contains(file.ContentType))
-                    return BadRequest($"'{file.FileName}' has an unsupported format.");
-
-                dto.Images.Add(new ProductImageUploadDto
-                {
-                    Image = file.OpenReadStream(),
-                    ImageName = file.FileName,
-                    ContentType = file.ContentType
-                });
-            }
-
             var updated = await _productService.UpdateAsync(id, dto);
             if (!updated) return NotFound();
             return NoContent();
@@ -130,6 +89,54 @@ namespace dotnet_ecommerce_api.Controller
         {
             var deleted = await _productService.DeleteAsync(id);
             if (!deleted) return NotFound();
+            return NoContent();
+        }
+
+        [HttpPost("{id:int}/images")]
+        public async Task<ActionResult<ProductImageDto>> AddImage(int id, IFormFile file, [FromForm] bool isMain = false, [FromForm] int displayOrder = 0)
+        {
+            //later should alter this with fluent validation 
+            if (file is null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+            if (file.Length > maxSizeBytes)
+                return BadRequest("File too large. Max size is 5 MB.");
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(file.ContentType))
+                return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
+
+            await using var stream = file.OpenReadStream();
+
+            var upload = new ProductImageDto
+            {
+                Image = stream,
+                ImageName = file.FileName,
+                ContentType = file.ContentType,
+                IsMain = isMain,
+                DisplayOrder = displayOrder
+            };
+
+            var result = await _productService.AddImageAsync(id, upload);
+            if (result is false) return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{productId:int}/images/{imageId:int}")]
+        public async Task<IActionResult> RemoveImage(int productId, int imageId)
+        {
+            var removed = await _productService.RemoveImageAsync(productId, imageId);
+            if (!removed) return NotFound();
+            return NoContent();
+        }
+
+        [HttpPut("{productId:int}/images/{imageId:int}/main")]
+        public async Task<IActionResult> SetMainImage(int productId, int imageId)
+        {
+            var updated = await _productService.SetMainImageAsync(productId, imageId);
+            if (!updated) return NotFound();
             return NoContent();
         }
     }

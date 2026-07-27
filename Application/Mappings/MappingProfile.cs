@@ -15,8 +15,13 @@ namespace Application.Mappings
                 .ForMember(dest => dest.BrandName,
                     opt => opt.MapFrom(src => src.Brand != null ? src.Brand.BrandName : null));
 
-            CreateMap<CreateProductDto, Product>();
+            CreateMap<CreateProductDto, Product>()
+                .ForMember(dest => dest.Images,
+                 opt => opt.Ignore());
             CreateMap<UpdateProductDto, Product>();
+
+            //ProductImage
+            CreateMap<ProductImage, ProductImageDto>();
 
             // Brand
             CreateMap<Brand, BrandDto>();
