@@ -11,19 +11,39 @@ namespace Infastructure.Configurations
             builder.HasKey(u => u.UserId);
 
             builder.Property(u => u.FirstName)
-            .HasMaxLength(100);
+                .HasMaxLength(100);
 
             builder.Property(u => u.LastName)
                 .HasMaxLength(100);
 
             builder.Property(u => u.PhoneNumber)
-            .HasMaxLength(20);
+                .IsRequired()
+                .HasMaxLength(20);
 
             builder.HasIndex(u => u.PhoneNumber)
-            .IsUnique();
+                .IsUnique();
+
+            builder.Property(u => u.PasswordHash)
+                .HasMaxLength(500);
+
+            builder.Property(u => u.Role)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasDefaultValue("Customer");
+
+            builder.Property(u => u.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.Property(u => u.DeletedAt)
+                .IsRequired(false);
 
             builder.Property(u => u.CreatedAt)
-            .HasDefaultValueSql("GETUTCDATE()");
+                .IsRequired()
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.Property(u => u.UpdatedAt)
+                .IsRequired(false);
         }
     }
 }
