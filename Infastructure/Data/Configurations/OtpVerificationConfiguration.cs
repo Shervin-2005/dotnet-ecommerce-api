@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infastructure.Configurations
+namespace Infastructure.Data.Configurations
 {
     public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerification>
     {
