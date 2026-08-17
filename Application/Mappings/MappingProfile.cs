@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Auth;
 using AutoMapper;
 using Domain.Entities;
 
@@ -32,6 +33,9 @@ namespace Application.Mappings
             CreateMap<Category, CategoryDto>();
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
+
+            // User
+            CreateMap<User, UserDto>();
         }
     }
 }
