@@ -1,4 +1,4 @@
-﻿namespace Infastructure.Settings
+﻿namespace Infrastructure.Settings
 {
     public class S3Settings
     {
