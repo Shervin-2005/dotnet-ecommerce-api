@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
-using Infastructure.Repositories;
-using Infrastructure.Persistence;
+using Infrastructure.Repositories;
+using Infrastructure.Data;
 
 namespace Infrastructure.Repositories
 {
@@ -9,9 +8,11 @@ namespace Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
         private IProductRepository? _products;
-        IBrandRepository? _brands;
-        ICategoryRepository _categories;
-        IProductImageRepository _productImages;
+        private IBrandRepository _brands;
+        private ICategoryRepository _categories;
+        private IProductImageRepository _productImages;
+        private IUserRepository _userRepository;
+        private IOtpVerificationRepository? _otpVerifications;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -22,6 +23,9 @@ namespace Infrastructure.Repositories
         public IBrandRepository Brands => _brands ??= new BrandRepository(_context);
         public ICategoryRepository Categories =>_categories ??= new CategoryRepository(_context);
         public IProductImageRepository ProductImages => _productImages ??= new ProductImageRepository(_context);
+        public IUserRepository Users => _userRepository ??= new UserRepository(_context);
+        public IOtpVerificationRepository OtpVerifications =>
+            _otpVerifications ??= new OtpVerificationRepository(_context);
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 
