@@ -9,6 +9,8 @@ namespace Domain.Entities
         public string? LastName { get; set; }
         public string? PasswordHash { get; set; }
         public string PhoneNumber { get; set; } = null!;
+        public string ProfileUrl { get; set; } = null!;
+        public Guid ImageFolderId { get; set; }
         public UserRole Role { get; set; } = UserRole.Customer;
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
