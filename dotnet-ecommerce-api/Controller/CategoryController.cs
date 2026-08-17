@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using dotnet_ecommerce_api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller
@@ -16,6 +17,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
         {
             var categories = await _categoryService.GetAllAsync();
@@ -23,6 +25,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CategoryDto>> GetById(int id)
         {
             var category = await _categoryService.GetByIdAsync(id);
@@ -31,6 +34,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CategoryDto>> Create([FromForm]CategoryRequest request)
         {
             //later should alter this with fluent validation 
@@ -60,6 +64,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, CategoryRequest request)
         {
             //later should alter this with fluent validation 
@@ -90,6 +95,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _categoryService.DeleteAsync(id);

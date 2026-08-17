@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using dotnet_ecommerce_api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller
@@ -15,6 +16,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll()
         {
             var products = await _productService.GetAllAsync();
@@ -22,6 +24,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> GetById(int id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -30,6 +33,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> Create([FromForm]ProductRequest request)
         {
             if (request.Images.Count == 0)
@@ -77,6 +81,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, UpdateProductDto dto)
         {
             var updated = await _productService.UpdateAsync(id, dto);
@@ -85,6 +90,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _productService.DeleteAsync(id);
@@ -93,6 +99,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPost("{id:int}/images")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductImageDto>> AddImage(int id, IFormFile file, [FromForm] bool isMain = false, [FromForm] int displayOrder = 0)
         {
             //later should alter this with fluent validation 
@@ -125,6 +132,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpDelete("{productId:int}/images/{imageId:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveImage(int productId, int imageId)
         {
             var removed = await _productService.RemoveImageAsync(productId, imageId);

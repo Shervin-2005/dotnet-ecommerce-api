@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Azure.Core;
 using dotnet_ecommerce_api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller
@@ -16,6 +17,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetAll()
         {
             var brands = await _brandService.GetAllAsync();
@@ -23,6 +25,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<BrandDto>> GetById(int id)
         {
             var brand = await _brandService.GetByIdAsync(id);
@@ -31,6 +34,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<BrandDto>> Create([FromForm]BrandRequest request)
         {
             //later should alter this with fluent validation 
@@ -60,6 +64,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, BrandRequest request)
         {
             //later should alter this with fluent validation 
@@ -90,6 +95,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _brandService.DeleteAsync(id);
