@@ -1,8 +1,9 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infastructure.Data.Configurations
+namespace Infrastructure.Data.Configurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {
@@ -28,8 +29,7 @@ namespace Infastructure.Data.Configurations
 
             builder.Property(u => u.Role)
                 .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Customer");
+                 .HasDefaultValue(UserRole.Customer);
 
             builder.Property(u => u.IsDeleted)
                 .IsRequired()

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infastructure.Data.Configurations
+namespace Infrastructure.Data.Configurations
 {
     public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerification>
     {
@@ -16,7 +16,7 @@ namespace Infastructure.Data.Configurations
 
             builder.Property(o => o.CodeHash)
                 .IsRequired()
-                .HasMaxLength(500);
+                .HasMaxLength(64);
 
             builder.Property(o => o.ExpiresAt)
                 .IsRequired();
@@ -29,7 +29,11 @@ namespace Infastructure.Data.Configurations
                 .IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasIndex(o => o.PhoneNumber);
+            builder.HasIndex(o => new
+            {
+                o.PhoneNumber,
+                o.CreatedAt
+            });
         }
     }
 }

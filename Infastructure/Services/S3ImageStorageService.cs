@@ -1,10 +1,10 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Interfaces;
-using Infastructure.Settings;
+using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 
-namespace Infastructure.Services
+namespace Infrastructure.Services
 {
     public class S3ImageStorageService : IImageStorageService
     {

@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Persistence;
+using Infrastructure.Data;
 
-namespace Infastructure.Repositories
+namespace Infrastructure.Repositories
 {
     public class BrandRepository : GenericRepository<Brand> , IBrandRepository
     {

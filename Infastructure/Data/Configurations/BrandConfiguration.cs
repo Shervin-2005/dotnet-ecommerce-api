@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infastructure.Data.Configurations
+namespace Infrastructure.Data.Configurations
 {
     public class BrandConfiguration : IEntityTypeConfiguration<Brand>
     {
