@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Auth;
+using Domain.Enums;
 
 namespace Application.Interfaces
 {
