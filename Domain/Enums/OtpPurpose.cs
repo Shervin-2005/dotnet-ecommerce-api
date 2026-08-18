@@ -4,6 +4,7 @@
     {
         Registration,
         Login,
+        ChangePhoneNumber,
         AddPassword
     }
 }
