@@ -44,6 +44,14 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(u => u.UpdatedAt)
                 .IsRequired(false);
+
+            builder.Property(u => u.ProfileUrl)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            builder.Property(u => u.ImageFolderId)
+               .IsRequired()
+               .HasMaxLength(500);
         }
     }
 }
