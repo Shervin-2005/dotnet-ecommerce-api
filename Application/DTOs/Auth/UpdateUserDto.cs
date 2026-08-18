@@ -9,7 +9,13 @@ namespace Application.DTOs.Auth
         [StringLength(100)]
         public string? LastName { get; set; }
 
-        [MinLength(8), MaxLength(12)]
-        public string? Password { get; set; }
+        [Required]
+        public Stream Image { get; set; } = default!;
+
+        [Required]
+        public string ImageName { get; set; } = null!;
+
+        [Required]
+        public string ContentType { get; set; } = null!;
     }
 }
