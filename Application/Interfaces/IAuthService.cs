@@ -10,6 +10,8 @@ namespace Application.Interfaces
         Task RequestLoginOtpAsync(RequestOtpDto dto);
         Task<AuthResponseDto?> VerifyLoginWithOtpAsync(LoginWithOtpDto dto);
         Task<AuthResponseDto?> LoginWithPasswordAsync(LoginWithPasswordDto dto);
+        Task RequestPhoneChangeAsync(int userId, RequestPhoneChangeDto dto);
+        Task<bool> VerifyPhoneChangeAsync(int userId, VerifyPhoneChangeDto dto);
         Task RequestAddPasswordOtpAsync(int userId);
         Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword);
         Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword);

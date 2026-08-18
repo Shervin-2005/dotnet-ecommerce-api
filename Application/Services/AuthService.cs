@@ -95,6 +95,48 @@ namespace Application.Services
             return BuildAuthResponse(user);
         }
 
+        public async Task RequestPhoneChangeAsync(int userId, RequestPhoneChangeDto dto)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user is null)
+                throw new InvalidOperationException("User not found.");
+
+            if (user.PhoneNumber == dto.NewPhoneNumber)
+                throw new InvalidOperationException(
+                    "This is already your phone number.");
+
+            var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.NewPhoneNumber);
+
+            if (existing is not null)
+                throw new InvalidOperationException("This phone number is already registered.");
+
+            await _otpService.IssueOtpAsync(dto.NewPhoneNumber, OtpPurpose.ChangePhoneNumber);
+        }
+
+        public async Task<bool> VerifyPhoneChangeAsync(int userId, VerifyPhoneChangeDto dto)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            if (user is null) return false;
+
+            var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.NewPhoneNumber);
+
+            if (existing is not null) throw new InvalidOperationException("This phone number is already registered.");
+
+            var valid = await _otpService.ConsumeOtpAsync(dto.NewPhoneNumber, dto.Code);
+
+            if (!valid) throw new InvalidOperationException("Invalid or expired verification code.");
+
+            user.PhoneNumber = dto.NewPhoneNumber;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+
         public async Task RequestAddPasswordOtpAsync(int userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
