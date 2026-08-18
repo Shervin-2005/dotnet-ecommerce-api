@@ -31,7 +31,7 @@ namespace Application.Services
             if (existing is not null)
                 throw new InvalidOperationException("This phone number is already registered.");
 
-            await _otpService.IssueOtpAsync(dto.PhoneNumber);
+            await _otpService.IssueOtpAsync(dto.PhoneNumber, OtpPurpose.Registration);
         }
 
         public async Task<AuthResponseDto> VerifyRegistrationOtpAsync(VerifyRegistrationOtpDto dto)
@@ -66,7 +66,7 @@ namespace Application.Services
             if (user is null)
                 throw new InvalidOperationException("No account found for this phone number.");
 
-            await _otpService.IssueOtpAsync(dto.PhoneNumber);
+            await _otpService.IssueOtpAsync(dto.PhoneNumber, OtpPurpose.Login);
         }
 
         public async Task<AuthResponseDto> VerifyLoginWithOtpAsync(LoginWithOtpDto dto)
@@ -104,7 +104,7 @@ namespace Application.Services
             if (!string.IsNullOrEmpty(user.PasswordHash))
                 throw new InvalidOperationException("You already have a password.");
 
-            await _otpService.IssueOtpAsync(user.PhoneNumber);
+            await _otpService.IssueOtpAsync(user.PhoneNumber, OtpPurpose.AddPassword);
         }
 
         public async Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword)

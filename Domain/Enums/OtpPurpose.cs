@@ -3,6 +3,7 @@
     public enum OtpPurpose
     {
         Registration,
-        Login
+        Login,
+        AddPassword
     }
 }

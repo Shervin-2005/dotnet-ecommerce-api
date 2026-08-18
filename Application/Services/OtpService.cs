@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -17,7 +18,7 @@ namespace Application.Services
             _unitOfWork = unitOfWork;
             _smsService = smsService;
         }
-        public async Task IssueOtpAsync(string phoneNumber)
+        public async Task IssueOtpAsync(string phoneNumber, OtpPurpose purpose)
         {
             var recent = await _unitOfWork.OtpVerifications.GetLatestAsync(phoneNumber);
             if (recent is not null && DateTime.UtcNow - recent.CreatedAt < ResendCooldown)
@@ -29,6 +30,7 @@ namespace Application.Services
             var otp = new OtpVerification
             {
                 PhoneNumber = phoneNumber,
+                Purpose = purpose,
                 CodeHash = Hash(code),
                 ExpiresAt = DateTime.UtcNow.Add(OtpLifetime),
                 IsUsed = false
