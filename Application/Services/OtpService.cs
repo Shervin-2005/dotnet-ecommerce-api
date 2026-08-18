@@ -21,7 +21,7 @@ namespace Application.Services
         public async Task IssueOtpAsync(string phoneNumber, OtpPurpose purpose)
         {
             var recent = await _unitOfWork.OtpVerifications.GetLatestAsync(phoneNumber);
-            if (recent is not null && DateTime.UtcNow - recent.CreatedAt < ResendCooldown)
+            if (recent is not null && DateTime.UtcNow - recent.CreatedAt < ResendCooldown && recent.Purpose == purpose)
                 throw new InvalidOperationException("Please wait before requesting another code.");
 
             // Cryptographically secure :)
