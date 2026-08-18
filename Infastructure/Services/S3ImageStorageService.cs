@@ -36,7 +36,7 @@ namespace Infrastructure.Services
             }
             catch
             {
-                //later would alter with proper error handilng with timeout exception and ass exception for dev env
+                //later would alter with proper error handilng with timeout exception and as exception for dev env
                 throw new Exception("something went wrong");
             }           
         }
