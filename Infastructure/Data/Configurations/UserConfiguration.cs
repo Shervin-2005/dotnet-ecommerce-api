@@ -22,7 +22,8 @@ namespace Infrastructure.Data.Configurations
                 .HasMaxLength(20);
 
             builder.HasIndex(u => u.PhoneNumber)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
 
             builder.Property(u => u.PasswordHash)
                 .HasMaxLength(500);
