@@ -1,5 +1,7 @@
-﻿using Application.DTOs.Auth;
+﻿using Application.DTOs;
+using Application.DTOs.Auth;
 using Application.Interfaces;
+using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -24,8 +26,31 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateMe(UpdateUserDto dto)
+        public async Task<IActionResult> UpdateMe(UserRequest request)
         {
+            //later should alter this with fluent validation 
+            if (request.File is null || request.File.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+            if (request.File.Length > maxSizeBytes)
+                return BadRequest("File too large. Max size is 5 MB.");
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(request.File.ContentType))
+                return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
+
+            await using var stream = request.File.OpenReadStream();
+
+            var dto = new UpdateUserDto
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Image = stream,
+                ImageName = request.File.FileName,
+                ContentType = request.File.ContentType
+            };
+
             var updated = await _userService.UpdateProfileAsync(GetUserId(), dto);
             if (!updated) return NotFound();
             return NoContent();
