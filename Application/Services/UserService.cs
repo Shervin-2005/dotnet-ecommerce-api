@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
 using AutoMapper;
+using Domain.Entities;
 
 namespace Application.Services
 {
@@ -9,12 +10,14 @@ namespace Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IImageStorageService _imageStorageService;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher passwordHasher)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher passwordHasher, IImageStorageService imageStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
+            _imageStorageService = imageStorageService;
         }
 
         public async Task<UserDto?> GetByIdAsync(int userId)
@@ -38,18 +41,43 @@ namespace Application.Services
 
         public async Task<bool> UpdateProfileAsync(int userId, UpdateUserDto dto)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user is null) return false;
+            string profileUrl = "";
+            try
+            {
+                var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                if (user is null) return false;
 
-            if (dto.FirstName is not null) user.FirstName = dto.FirstName;
-            if (dto.LastName is not null) user.LastName = dto.LastName;
-            if (!string.IsNullOrEmpty(dto.Password)) user.PasswordHash = _passwordHasher.Hash(dto.Password);
+                var oldProfileUrl = user.ProfileUrl;
 
-            user.UpdatedAt = DateTime.UtcNow;
+                var extension = Path.GetExtension(dto.ImageName);
+                var imageName = $"profile{extension}";
 
-            _unitOfWork.Users.Update(user);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+                profileUrl = await _imageStorageService.UploadAsync(dto.Image, $"User/{user.ImageFolderId}/images",
+                                                                      imageName, dto.ContentType);
+                user.ProfileUrl = profileUrl;
+
+                if (dto.FirstName is not null) user.FirstName = dto.FirstName;
+                if (dto.LastName is not null) user.LastName = dto.LastName;
+
+                    user.UpdatedAt = DateTime.UtcNow;
+
+                _unitOfWork.Users.Update(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                if (!string.Equals(oldProfileUrl, profileUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _imageStorageService.DeleteAsync(oldProfileUrl);
+                }
+                return true;
+            }
+            catch
+            {
+                if (!string.IsNullOrEmpty(profileUrl))
+                {
+                    await _imageStorageService.DeleteAsync(profileUrl);
+                }
+                throw;
+            }
         }
     }
 }

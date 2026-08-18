@@ -2,12 +2,14 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
+using System.ComponentModel;
 using System.Security.Claims;
 
 namespace Application.Services
 {
     public class AuthService : IAuthService
     {
+        private const string DefaultProfileUrl = "https://s3.ir-thr-at1.arvanstorage.ir/shams1384/shams1384%2FDefault%20Images%2Fprofile.png";
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
@@ -45,8 +47,12 @@ namespace Application.Services
             var user = new User
             {
                 PhoneNumber = dto.PhoneNumber,
-                Role = UserRole.Customer
+                Role = UserRole.Customer,
+                ProfileUrl = DefaultProfileUrl,
             };
+
+            var folderId = Guid.NewGuid();
+            user.ImageFolderId = folderId;
 
             await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.SaveChangesAsync();
