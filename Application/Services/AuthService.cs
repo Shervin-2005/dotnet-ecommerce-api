@@ -94,6 +94,59 @@ namespace Application.Services
 
             return BuildAuthResponse(user);
         }
+
+        public async Task RequestAddPasswordOtpAsync(int userId)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null)
+                throw new InvalidOperationException("User not found.");
+
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+                throw new InvalidOperationException("You already have a password.");
+
+            await _otpService.IssueOtpAsync(user.PhoneNumber);
+        }
+
+        public async Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null) return AddPasswordResult.UserNotFound;
+
+            if (!string.IsNullOrEmpty(user.PasswordHash))
+                return AddPasswordResult.PasswordAlreadyExists;
+
+            var isOtpValid = await _otpService.ConsumeOtpAsync(user.PhoneNumber, otpCode);
+            if (!isOtpValid) return AddPasswordResult.InvalidOtp;
+
+            user.PasswordHash = _passwordHasher.Hash(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return AddPasswordResult.Success;
+        }
+
+        public async Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user is null) return ChangePasswordResult.UserNotFound;
+
+            if (string.IsNullOrEmpty(user.PasswordHash))
+                return ChangePasswordResult.CurrentPasswordNotFound;
+
+            var isCurrentPasswordValid = _passwordHasher.Verify(user.PasswordHash, currentPassword);
+            if (!isCurrentPasswordValid) return ChangePasswordResult.IncorrectCurrentPassword;
+
+            user.PasswordHash = _passwordHasher.Hash(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ChangePasswordResult.Success;
+        }
+
         private AuthResponseDto BuildAuthResponse(User user)
         {
             var claims = new List<Claim>
