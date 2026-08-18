@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Services
 {
@@ -9,15 +10,15 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IOtpService _otpService;
         private readonly IImageStorageService _imageStorageService;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IPasswordHasher passwordHasher, IImageStorageService imageStorageService)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IImageStorageService imageStorageService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _passwordHasher = passwordHasher;
             _imageStorageService = imageStorageService;
+            _otpService = otpService;
         }
 
         public async Task<UserDto?> GetByIdAsync(int userId)
