@@ -48,23 +48,27 @@ namespace Application.Services
                 if (user is null) return false;
 
                 var oldProfileUrl = user.ProfileUrl;
+                var imageProvided = dto.Image is not null;
 
-                var extension = Path.GetExtension(dto.ImageName);
-                var imageName = $"profile{extension}";
+                if (imageProvided)
+                {
+                    var extension = Path.GetExtension(dto.ImageName);
+                    var imageName = $"profile{extension}";
 
-                profileUrl = await _imageStorageService.UploadAsync(dto.Image, $"User/{user.ImageFolderId}/images",
-                                                                      imageName, dto.ContentType);
-                user.ProfileUrl = profileUrl;
+                    profileUrl = await _imageStorageService.UploadAsync(dto.Image!, $"User/{user.ImageFolderId}/images",
+                                                                          imageName, dto.ContentType!);
+                    user.ProfileUrl = profileUrl;
+                }
 
                 if (dto.FirstName is not null) user.FirstName = dto.FirstName;
                 if (dto.LastName is not null) user.LastName = dto.LastName;
 
-                    user.UpdatedAt = DateTime.UtcNow;
+                user.UpdatedAt = DateTime.UtcNow;
 
                 _unitOfWork.Users.Update(user);
                 await _unitOfWork.SaveChangesAsync();
 
-                if (!string.Equals(oldProfileUrl, profileUrl, StringComparison.OrdinalIgnoreCase))
+                if (imageProvided && !string.Equals(oldProfileUrl, profileUrl, StringComparison.OrdinalIgnoreCase))
                 {
                     await _imageStorageService.DeleteAsync(oldProfileUrl);
                 }

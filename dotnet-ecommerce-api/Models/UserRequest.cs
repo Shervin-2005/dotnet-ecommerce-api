@@ -9,7 +9,6 @@ namespace dotnet_ecommerce_api.Models
         [StringLength(100)]
         public string? LastName { get; set; }
 
-        [Required]
-        public IFormFile File { get; set; } = null!;
+        public IFormFile? File { get; set; }
     }
 }

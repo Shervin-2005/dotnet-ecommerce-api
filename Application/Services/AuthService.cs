@@ -112,6 +112,7 @@ namespace Application.Services
                 PhoneNumber = user.PhoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                ProfileUrl = user.ProfileUrl,
                 Role = user.Role
             };
         }
