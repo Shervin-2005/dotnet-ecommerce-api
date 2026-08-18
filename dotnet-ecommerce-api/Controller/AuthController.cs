@@ -76,6 +76,49 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [Authorize]
+        [HttpPost("me/phone/request")]
+        public async Task<IActionResult> RequestPhoneChange(RequestPhoneChangeDto dto)
+        {
+            try
+            {
+                await _authService.RequestPhoneChangeAsync(GetUserId(), dto);
+
+                return Ok(new
+                {
+                    message = "Verification code sent to the new phone number."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("me/phone/verify")]
+        public async Task<IActionResult> VerifyPhoneChange(VerifyPhoneChangeDto dto)
+        {
+            try
+            {
+                var result =
+                    await _authService.VerifyPhoneChangeAsync(
+                        GetUserId(), dto);
+
+                if (!result)
+                    return NotFound();
+
+                return Ok(new
+                {
+                    message = "Phone number changed successfully."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
         [HttpPost("me/password/otp")]
         public async Task<IActionResult> RequestAddPasswordOtp()
         {
