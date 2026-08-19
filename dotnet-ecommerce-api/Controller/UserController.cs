@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Auth;
 using Application.Interfaces;
+using Application.Services;
 using Domain.Enums;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -74,6 +75,22 @@ namespace dotnet_ecommerce_api.Controller
             var deleted = await _userService.SoftDeleteAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllActiveUsers()
+        {
+            var users = await _userService.GetAllActiveUsersAsync();
+            return Ok(users);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
 
         private int GetUserId()

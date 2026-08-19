@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Auth;
+﻿using Application.DTOs;
+using Application.DTOs.Auth;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -38,6 +39,18 @@ namespace Application.Services
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllActiveUsersAsync()
+        {
+            var users = await _unitOfWork.Users.GetAllAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _unitOfWork.Users.GetAllUsersWithoutFilter();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
         public async Task<bool> UpdateProfileAsync(int userId, UpdateUserDto dto)

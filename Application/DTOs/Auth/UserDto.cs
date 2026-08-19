@@ -11,7 +11,7 @@ namespace Application.DTOs.Auth
         public string ProfileUrl { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public UserRole Role { get; set; }
-        public bool HashPassword { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -13,5 +13,8 @@ namespace Infrastructure.Repositories
         }
         public async Task<User?> GetByPhoneNumberAsync(string phoneNumber) =>
             await _dbSet.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+
+        public async Task<IEnumerable<User>> GetAllUsersWithoutFilter() =>
+            await _dbSet.IgnoreQueryFilters().ToListAsync();
     }
 }
