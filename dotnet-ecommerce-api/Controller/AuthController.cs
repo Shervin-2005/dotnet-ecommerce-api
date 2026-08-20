@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
-using Application.Services;
 using Domain.Enums;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -188,7 +187,20 @@ namespace dotnet_ecommerce_api.Controller
                 _ => BadRequest("Unable to change password.")
             };
         }
+        [HttpPost("refresh")]
+        public async Task<ActionResult<AuthResponseDto>> Refresh(RefreshTokenDto dto)
+        {
+            var response = await _authService.RefreshTokenAsync(dto);
+            if (response is null) return Unauthorized("Invalid or expired refresh token.");
+            return Ok(response);
+        }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(RefreshTokenDto dto)
+        {
+            await _authService.LogoutAsync(dto);
+            return NoContent();
+        }
         private int GetUserId()
         {
             var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
