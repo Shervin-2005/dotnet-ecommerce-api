@@ -1,9 +1,12 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
+using Application.Settings;
 using Domain.Entities;
 using Domain.Enums;
-using System.ComponentModel;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Application.Services
 {
@@ -14,15 +17,18 @@ namespace Application.Services
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
         private readonly IOtpService _otpService;
+        private readonly JwtSettings _jwtSettings;
 
         public AuthService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, 
                            ITokenService tokenService,
-                           IOtpService otpService)
+                           IOtpService otpService,
+                           IOptions<JwtSettings> jwtSettings)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
             _otpService = otpService;
+            _jwtSettings = jwtSettings.Value;
         }
 
         public async Task RequestRegistrationOtpAsync(RequestOtpDto dto)
@@ -57,7 +63,8 @@ namespace Application.Services
             await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            return BuildAuthResponse(user);
+            return await IssueTokensAsync(user);
+
         }
 
         public async Task RequestLoginOtpAsync(RequestOtpDto dto)
@@ -79,7 +86,7 @@ namespace Application.Services
             if (!valid) 
                 throw new InvalidOperationException("Invalid or expired verification code.");
 
-            return BuildAuthResponse(user);
+            return await IssueTokensAsync(user);
         }
 
         public async Task<AuthResponseDto> LoginWithPasswordAsync(LoginWithPasswordDto dto)
@@ -92,7 +99,7 @@ namespace Application.Services
             if (!valid)
                 throw new InvalidOperationException("Invalid phone number or password.");
 
-            return BuildAuthResponse(user);
+            return await IssueTokensAsync(user);
         }
 
         public async Task RequestPhoneChangeAsync(int userId, RequestPhoneChangeDto dto)
@@ -188,8 +195,35 @@ namespace Application.Services
 
             return ChangePasswordResult.Success;
         }
+        public async Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto dto)
+        {
+            var tokenHash = Hash(dto.RefreshToken);
+            var stored = await _unitOfWork.RefreshTokens.GetByTokenHashAsync(tokenHash);
 
-        private AuthResponseDto BuildAuthResponse(User user)
+            if (stored is null || stored.IsRevoked || stored.ExpiresAt < DateTime.UtcNow)
+                return null;
+
+            var user = await _unitOfWork.Users.GetByIdAsync(stored.UserId);
+            if (user is null) return null;
+
+            stored.IsRevoked = true;
+            stored.RevokedAt = DateTime.UtcNow;
+
+            return await IssueTokensAsync(user); // saves the revocation and create the new token together
+        }
+
+        public async Task LogoutAsync(RefreshTokenDto dto)
+        {
+            var tokenHash = Hash(dto.RefreshToken);
+            var stored = await _unitOfWork.RefreshTokens.GetByTokenHashAsync(tokenHash);
+
+            if (stored is null || stored.IsRevoked) return; 
+
+            stored.IsRevoked = true;
+            stored.RevokedAt = DateTime.UtcNow;
+            await _unitOfWork.SaveChangesAsync();
+        }
+        private async Task<AuthResponseDto> IssueTokensAsync(User user)
         {
             var claims = new List<Claim>
             {
@@ -198,18 +232,35 @@ namespace Application.Services
                 new(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var token = _tokenService.GenerateAccessToken(claims);
+            var accessToken = _tokenService.GenerateAccessToken(claims);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = user.UserId,
+                TokenHash = Hash(refreshToken),
+                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+                IsRevoked = false
+            };
+
+            await _unitOfWork.RefreshTokens.AddAsync(refreshTokenEntity);
+            await _unitOfWork.SaveChangesAsync();
 
             return new AuthResponseDto
             {
-                Token = token,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
                 UserId = user.UserId,
                 PhoneNumber = user.PhoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                ProfileUrl = user.ProfileUrl,
                 Role = user.Role
             };
+        }
+        private static string Hash(string input)
+        {
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+            return Convert.ToHexString(bytes);
         }
     }
 }

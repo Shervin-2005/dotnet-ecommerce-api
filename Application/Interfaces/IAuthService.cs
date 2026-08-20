@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Auth;
+using Domain.Entities;
 using Domain.Enums;
 
 namespace Application.Interfaces
@@ -15,5 +16,7 @@ namespace Application.Interfaces
         Task RequestAddPasswordOtpAsync(int userId);
         Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword);
         Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
+        Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto dto);
+        Task LogoutAsync(RefreshTokenDto dto);
     }
 }
