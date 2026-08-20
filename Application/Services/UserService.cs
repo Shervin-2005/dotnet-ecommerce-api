@@ -37,6 +37,7 @@ namespace Application.Services
             user.DeletedAt = DateTime.UtcNow;
 
             _unitOfWork.Users.Update(user);
+            await _unitOfWork.RefreshTokens.RevokeAllForUserAsync(userId);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
