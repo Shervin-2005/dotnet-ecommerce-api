@@ -1,9 +1,11 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
+using Application.Settings;
 using Domain.Enums;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace dotnet_ecommerce_api.Controller
@@ -11,10 +13,12 @@ namespace dotnet_ecommerce_api.Controller
     public class AuthController : BaseController
     {
         private readonly IAuthService _authService;
+        private readonly JwtSettings _jwtSettings;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IOptions<JwtSettings> jwtSettings)
         {
             _authService = authService;
+            _jwtSettings = jwtSettings.Value;
         }
         // remove try catch after create global exception hanlder middleware
         [HttpPost("register/request-otp")]
@@ -36,7 +40,10 @@ namespace dotnet_ecommerce_api.Controller
             try
             {
                 var response = await _authService.VerifyRegistrationOtpAsync(dto);
-                return Ok(response);
+
+                SetAuthCookies(response);
+
+                return Ok();
             }
             catch (InvalidOperationException ex)
             {
@@ -63,7 +70,10 @@ namespace dotnet_ecommerce_api.Controller
         {
             var response = await _authService.VerifyLoginWithOtpAsync(dto);
             if (response is null) return Unauthorized("Invalid or expired code.");
-            return Ok(response);
+
+            SetAuthCookies(response);
+
+            return Ok();
         }
 
         [HttpPost("login/password")]
@@ -71,7 +81,10 @@ namespace dotnet_ecommerce_api.Controller
         {
             var response = await _authService.LoginWithPasswordAsync(dto);
             if (response is null) return Unauthorized("Invalid phone number or password.");
-            return Ok(response);
+
+            SetAuthCookies(response);
+
+            return Ok();
         }
 
         [Authorize]
@@ -104,8 +117,12 @@ namespace dotnet_ecommerce_api.Controller
                 if (!result)
                     return NotFound();
 
-                var newTokens = await _authService.ReissueTokensAsync(userId);
-                return Ok(newTokens);
+                //new tokens for new phone number
+                var response = await _authService.ReissueTokensAsync(userId);
+
+                SetAuthCookies(response);
+
+                return Ok();
             }
             catch (InvalidOperationException ex)
             {
@@ -184,19 +201,84 @@ namespace dotnet_ecommerce_api.Controller
             };
         }
         [HttpPost("refresh")]
-        public async Task<ActionResult<AuthResponseDto>> Refresh(RefreshTokenDto dto)
+        public async Task<IActionResult> Refresh()
         {
+            // Read refresh token from HttpOnly cookie
+            if (!Request.Cookies.TryGetValue("RefreshToken", out var refreshToken))
+            {
+                return Unauthorized("Refresh token is missing.");
+            }
+
+            var dto = new RefreshTokenDto
+            {
+                RefreshToken = refreshToken
+            };
+
             var response = await _authService.RefreshTokenAsync(dto);
-            if (response is null) return Unauthorized("Invalid or expired refresh token.");
-            return Ok(response);
+
+            if (response is null)
+            {
+                // Remove invalid cookies
+                DeleteAuthCookies();
+
+                return Unauthorized("Invalid or expired refresh token.");
+            }
+
+            SetAuthCookies(response);
+
+            return Ok();
         }
 
+
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout(RefreshTokenDto dto)
+        public async Task<IActionResult> Logout()
         {
-            await _authService.LogoutAsync(dto);
+            if (Request.Cookies.TryGetValue("RefreshToken", out var refreshToken))
+            {
+                var dto = new RefreshTokenDto
+                {
+                    RefreshToken = refreshToken
+                };
+
+                await _authService.LogoutAsync(dto);
+            }
+
+            // Remove tokens from browser
+            DeleteAuthCookies();
+
             return NoContent();
         }
+
+        private void SetAuthCookies(AuthResponseDto response)
+        {
+            var accessTokenOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes)
+            };
+
+            var refreshTokenOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
+            };
+
+            Response.Cookies.Append("AccessToken", response.AccessToken, accessTokenOptions);
+
+            Response.Cookies.Append("RefreshToken", response.RefreshToken, refreshTokenOptions);
+        }
+
+
+        private void DeleteAuthCookies()
+        {
+            Response.Cookies.Delete("AccessToken");
+            Response.Cookies.Delete("RefreshToken");
+        }
+
         private int GetUserId()
         {
             var value = User.FindFirstValue(ClaimTypes.NameIdentifier);

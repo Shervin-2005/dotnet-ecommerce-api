@@ -93,6 +93,20 @@ builder.Services
 
             ClockSkew = TimeSpan.Zero
         };
+
+        //// Read JWT token from cookie
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.TryGetValue("AccessToken", out var accessToken))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 builder.Services.AddAuthorization();
