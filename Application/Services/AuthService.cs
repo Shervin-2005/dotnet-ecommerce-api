@@ -212,6 +212,16 @@ namespace Application.Services
             return await IssueTokensAsync(user); // saves the revocation and create the new token together
         }
 
+        public async Task<AuthResponseDto> ReissueTokensAsync(int userId)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId)
+                ?? throw new InvalidOperationException("User not found.");
+
+            await _unitOfWork.RefreshTokens.RevokeAllForUserAsync(userId);
+
+            return await IssueTokensAsync(user); // saves the revocations + the new token together
+        }
+
         public async Task LogoutAsync(RefreshTokenDto dto)
         {
             var tokenHash = Hash(dto.RefreshToken);

@@ -17,6 +17,7 @@ namespace Application.Interfaces
         Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword);
         Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
         Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto dto);
+        Task<AuthResponseDto> ReissueTokensAsync(int userId);
         Task LogoutAsync(RefreshTokenDto dto);
     }
 }

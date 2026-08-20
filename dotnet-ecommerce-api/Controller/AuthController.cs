@@ -93,23 +93,19 @@ namespace dotnet_ecommerce_api.Controller
             }
         }
 
-        [Authorize]
         [HttpPost("me/phone/verify")]
-        public async Task<IActionResult> VerifyPhoneChange(VerifyPhoneChangeDto dto)
+        public async Task<ActionResult<AuthResponseDto>> VerifyPhoneChange(VerifyPhoneChangeDto dto)
         {
             try
             {
-                var result =
-                    await _authService.VerifyPhoneChangeAsync(
-                        GetUserId(), dto);
+                var userId = GetUserId();
+                var result = await _authService.VerifyPhoneChangeAsync(userId, dto);
 
                 if (!result)
                     return NotFound();
 
-                return Ok(new
-                {
-                    message = "Phone number changed successfully."
-                });
+                var newTokens = await _authService.ReissueTokensAsync(userId);
+                return Ok(newTokens);
             }
             catch (InvalidOperationException ex)
             {
