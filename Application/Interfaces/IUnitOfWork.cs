@@ -8,6 +8,7 @@
         IProductImageRepository ProductImages { get; }
         IUserRepository Users {  get; }
         IOtpVerificationRepository OtpVerifications { get; }
+        IRefreshTokenRepository? RefreshTokens {  get; }
         Task<int> SaveChangesAsync();
     }
 }

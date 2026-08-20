@@ -13,6 +13,7 @@ namespace Infrastructure.Repositories
         private IProductImageRepository _productImages;
         private IUserRepository _userRepository;
         private IOtpVerificationRepository? _otpVerifications;
+        private IRefreshTokenRepository? _refreshTokens;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -26,6 +27,9 @@ namespace Infrastructure.Repositories
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
         public IOtpVerificationRepository OtpVerifications =>
             _otpVerifications ??= new OtpVerificationRepository(_context);
+        
+        public IRefreshTokenRepository RefreshTokens =>
+            _refreshTokens ??= new RefreshTokenRepository(_context);
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 
