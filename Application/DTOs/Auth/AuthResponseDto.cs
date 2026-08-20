@@ -4,7 +4,8 @@ namespace Application.DTOs.Auth
 {
     public class AuthResponseDto
     {
-        public string Token { get; set; } = null!;
+        public string AccessToken { get; set; } = null!;
+        public string RefreshToken { get; set; } = null!;
         public int UserId { get; set; }
         public string PhoneNumber { get; set; } = null!;
         public string? FirstName { get; set; }
