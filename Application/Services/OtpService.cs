@@ -39,7 +39,7 @@ namespace Application.Services
             await _unitOfWork.OtpVerifications.AddAsync(otp);
             await _unitOfWork.SaveChangesAsync();
 
-            await _smsService.SendAsync(phoneNumber, $"Your verification code is {code}. It expires in {(int)OtpLifetime.TotalMinutes} minutes.");
+            await _smsService.SendAsync(phoneNumber, code);
         }
 
         public async Task<bool> ConsumeOtpAsync(string phoneNumber, string code)
