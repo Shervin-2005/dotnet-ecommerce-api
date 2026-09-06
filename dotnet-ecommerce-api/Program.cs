@@ -16,11 +16,11 @@ using Application.Settings;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString =
-    Environment.GetEnvironmentVariable("DOTNET_ECOMMERCE_API")
- ?? throw new Exception("Environment variable DOTNET_ECOMMERCE_API is not set");
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new Exception("DefaultConnection is not configured");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
@@ -88,6 +88,10 @@ builder.Services
             ValidIssuer = jwtSettings.Issuer,
             ValidAudience = jwtSettings.Audience,
 
+            ValidAlgorithms = new[]
+            {
+                SecurityAlgorithms.HmacSha256
+            },
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings.Secret)
             ),

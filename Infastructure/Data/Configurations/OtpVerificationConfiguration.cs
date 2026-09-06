@@ -27,7 +27,7 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(o => o.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasDefaultValueSql("NOW()");
 
             builder.HasIndex(o => new
             {

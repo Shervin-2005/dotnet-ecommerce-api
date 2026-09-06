@@ -17,10 +17,10 @@ namespace Infrastructure.Configurations
             builder.HasIndex(t => t.TokenHash)
                 .IsUnique();
 
-            builder.HasOne(t => t.User)
-                .WithMany()
-                .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.Cascade); 
+            builder.HasOne(t => t.User).
+                WithMany(u => u.RefreshTokens).
+                HasForeignKey(t => t.UserId).
+                OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

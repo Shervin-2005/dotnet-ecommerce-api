@@ -23,7 +23,7 @@ namespace Infrastructure.Data.Configurations
 
             builder.HasIndex(u => u.PhoneNumber)
                 .IsUnique()
-                .HasFilter("[IsDeleted] = 0");
+                .HasFilter("\"IsDeleted\" = false");
 
             builder.Property(u => u.PasswordHash)
                 .HasMaxLength(500);
@@ -41,7 +41,7 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(u => u.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasDefaultValueSql("NOW()");
 
             builder.Property(u => u.UpdatedAt)
                 .IsRequired(false);
