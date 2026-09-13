@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services
 {
-    public class S3ImageStorageService : IImageStorageService
+    public class S3FileStorageService : IImageStorageService
     {
         private readonly IAmazonS3 _s3Client;
         private readonly S3Settings _s3Settings;
 
-        public S3ImageStorageService(IAmazonS3 s3Client, IOptions<S3Settings> options)
+        public S3FileStorageService(IAmazonS3 s3Client, IOptions<S3Settings> options)
         {
             _s3Client = s3Client;
             _s3Settings = options.Value;
