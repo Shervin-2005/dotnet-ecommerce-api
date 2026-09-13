@@ -15,6 +15,8 @@ namespace Infrastructure.Repositories
         private IOtpVerificationRepository? _otpVerifications;
         private IRefreshTokenRepository? _refreshTokens;
         private IReviewRepository? _reviews;
+        private ICartRepository? _carts;
+        private ICartItemRepository? _cartItems;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -33,9 +35,12 @@ namespace Infrastructure.Repositories
         
         public IReviewRepository Reviews =>
             _reviews ??= new ReviewRepository(_context);
+        
+        public ICartRepository Carts => _carts ??= new CartRepository(_context);
+
+        public ICartItemRepository CartItems =>  _cartItems ??= new CartItemRepository(_context);
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
-
         public void Dispose() => _context.Dispose();
     }
 }

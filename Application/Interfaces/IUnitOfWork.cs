@@ -10,6 +10,8 @@
         IOtpVerificationRepository OtpVerifications { get; }
         IRefreshTokenRepository? RefreshTokens {  get; }
         IReviewRepository Reviews { get; }
+        ICartRepository Carts { get; }
+        ICartItemRepository CartItems { get; }
         Task<int> SaveChangesAsync();
     }
 }
