@@ -36,6 +36,14 @@ namespace Application.Mappings
 
             // User
             CreateMap<User, UserDto>();
+            
+            // Review
+            CreateMap<ProductReview, ReviewDto>()
+                .ForMember(
+                    dest => dest.ReviewerName,
+                    opt => opt.MapFrom(src =>
+                        $"{src.User.FirstName} {src.User.LastName}".Trim())
+                );
         }
     }
 }
