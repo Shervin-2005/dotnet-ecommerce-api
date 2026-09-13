@@ -96,13 +96,38 @@ namespace Application.Services
         public async Task<IEnumerable<ProductDto>> GetAllAsync()
         {
             var products = await _unitOfWork.Products.GetAllAsync();
-            return _mapper.Map<IEnumerable<ProductDto>>(products);
+            var productList = products.ToList();
+
+            var dtos = _mapper.Map<List<ProductDto>>(productList);
+            
+            var summaries = await _unitOfWork.Reviews.GetRatingSummariesAsync(productList.Select(p => p.ProductId));
+            foreach (var dto in dtos)
+            {
+                if (summaries.TryGetValue(dto.ProductId, out var summary))
+                {
+                    dto.AverageRating = Math.Round(summary.AverageRating, 1);
+                    dto.ReviewCount = summary.Count;
+                }
+            }
+
+            return dtos;
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id)
         {
             var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
-            return product is null ? null : _mapper.Map<ProductDto>(product);
+            if (product is null) return null;
+
+            var dto = _mapper.Map<ProductDto>(product);
+
+            var summaries = await _unitOfWork.Reviews.GetRatingSummariesAsync(new[] { id });
+            if (summaries.TryGetValue(id, out var summary))
+            {
+                dto.AverageRating = Math.Round(summary.AverageRating, 1);
+                dto.ReviewCount = summary.Count;
+            }
+
+            return dto;
         }
 
         public async Task<bool> UpdateAsync(int id, UpdateProductDto dto)
