@@ -16,5 +16,6 @@
         public Category? Category { get; set; }
         public Brand? Brand { get; set; }
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+        public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
     }
 }
