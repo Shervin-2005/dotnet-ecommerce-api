@@ -14,7 +14,8 @@ namespace Infrastructure.Data
         public DbSet<Brand> Brands { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<OtpVerification> OtpVerifications { get; set; } = null!;
-
+        public DbSet<Cart> Carts { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
