@@ -44,6 +44,18 @@ namespace Application.Mappings
                     opt => opt.MapFrom(src =>
                         $"{src.User.FirstName} {src.User.LastName}".Trim())
                 );
+            
+            //Cart
+            CreateMap<CartItem, CartItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Product.Price))
+                .ForMember(dest => dest.LineTotal, opt => opt.MapFrom(src => src.Product.Price * src.Quantity))
+                .ForMember(dest => dest.ProductImageUrl, opt => opt.MapFrom(src =>
+                    src.Product.Images.Where(i => i.IsMain).Select(i => i.ImageUrl).FirstOrDefault()));
+            //Cart Item
+            CreateMap<Cart, CartDto>()
+                .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.Items.Sum(i => i.Quantity)))
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Items.Sum(i => i.Quantity * i.Product.Price)));
         }
     }
 }
