@@ -9,6 +9,7 @@
         IUserRepository Users {  get; }
         IOtpVerificationRepository OtpVerifications { get; }
         IRefreshTokenRepository? RefreshTokens {  get; }
+        IReviewRepository Reviews { get; }
         Task<int> SaveChangesAsync();
     }
 }
