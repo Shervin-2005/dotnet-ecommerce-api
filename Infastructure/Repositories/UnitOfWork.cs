@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories
         private IReviewRepository? _reviews;
         private ICartRepository? _carts;
         private ICartItemRepository? _cartItems;
-
+        private IOrderRepository? _orders;
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -39,6 +39,8 @@ namespace Infrastructure.Repositories
         public ICartRepository Carts => _carts ??= new CartRepository(_context);
 
         public ICartItemRepository CartItems =>  _cartItems ??= new CartItemRepository(_context);
+        
+        public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
 
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
         public void Dispose() => _context.Dispose();
