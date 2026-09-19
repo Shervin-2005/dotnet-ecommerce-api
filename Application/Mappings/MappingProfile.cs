@@ -56,6 +56,12 @@ namespace Application.Mappings
             CreateMap<Cart, CartDto>()
                 .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.Items.Sum(i => i.Quantity)))
                 .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Items.Sum(i => i.Quantity * i.Product.Price)));
+            
+            //Order Item
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.LineTotal, opt => opt.MapFrom(src => src.UnitPrice * src.Quantity));
+            //Order
+            CreateMap<Order, OrderDto>();
         }
     }
 }
