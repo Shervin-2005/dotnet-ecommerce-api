@@ -60,8 +60,12 @@ namespace Application.Mappings
             //Order Item
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(dest => dest.LineTotal, opt => opt.MapFrom(src => src.UnitPrice * src.Quantity));
+            
             //Order
             CreateMap<Order, OrderDto>();
+            
+            //Payment
+            CreateMap<Payment, PaymentDto>();
         }
     }
 }
