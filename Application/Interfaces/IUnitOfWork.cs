@@ -13,6 +13,7 @@
         ICartRepository Carts { get; }
         ICartItemRepository CartItems { get; }
         IOrderRepository Orders { get; }
+        IPaymentRepository Payments { get; }
         Task<int> SaveChangesAsync();
     }
 }
