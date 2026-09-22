@@ -74,23 +74,15 @@ namespace Application.Services
         {
             var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
             if (product is null) return false;
-
-            try
-            {
+            
                 foreach(var image in product.Images)
                 {
                     await _imageStorageService.DeleteAsync(image.ImageUrl);
                 }
 
-                _unitOfWork.Products.Delete(product);
-                await _unitOfWork.SaveChangesAsync();
-                return true;
-
-            }
-            catch
-            {
-                throw;
-            }
+            _unitOfWork.Products.Delete(product);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllAsync()
@@ -211,16 +203,9 @@ namespace Application.Services
                  remaining.DisplayOrder -= 1;
 
             await _unitOfWork.SaveChangesAsync();
-
-            try
-            {
-                await _imageStorageService.DeleteAsync(deletedUrl);
-            }
-            catch
-            {
-                throw;
-            }
-
+            
+            await _imageStorageService.DeleteAsync(deletedUrl);
+            
             if (wasMain)
             {
                 var nextMain = product.Images

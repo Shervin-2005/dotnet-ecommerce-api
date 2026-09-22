@@ -3,6 +3,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -27,11 +28,11 @@ namespace Application.Services
         {
             var product = await _unitOfWork.Products.GetByIdAsync(productId);
             if (product is null)
-                throw new InvalidOperationException("Product not found.");
+                throw new NotFoundException("Product not found.");
 
             var existing = await _unitOfWork.Reviews.GetByProductAndUserAsync(productId, userId);
             if (existing is not null)
-                throw new InvalidOperationException("You have already reviewed this product.");
+                throw new ConflictException("You have already reviewed this product.");
 
             var review = new ProductReview
             {
@@ -45,7 +46,7 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             
             review.User = await _unitOfWork.Users.GetByIdAsync(userId)
-                ?? throw new InvalidOperationException("User not found.");
+                ?? throw new NotFoundException("User not found.");
 
             return _mapper.Map<ReviewDto>(review);
         }

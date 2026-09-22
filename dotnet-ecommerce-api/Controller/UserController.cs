@@ -7,6 +7,7 @@ using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Domain.Exceptions;
 
 namespace dotnet_ecommerce_api.Controller
 {
@@ -23,7 +24,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<UserDto>> GetMe()
         {
             var user = await _userService.GetByIdAsync(GetUserId());
-            if (user is null) return NotFound();
+            if (user is null) throw new NotFoundException("User not found.");
             return Ok(user);
         }
 
@@ -39,11 +40,11 @@ namespace dotnet_ecommerce_api.Controller
                 {
                     const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
                     if (request.File.Length > maxSizeBytes)
-                        return BadRequest("File too large. Max size is 5 MB.");
+                        throw new BadRequestException("File too large. Max size is 5 MB.");
 
                     var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
                     if (!allowedTypes.Contains(request.File.ContentType))
-                        return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
+                        throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
 
                     imageStream = request.File.OpenReadStream();
                 }
@@ -58,7 +59,7 @@ namespace dotnet_ecommerce_api.Controller
                 };
 
                 var updated = await _userService.UpdateProfileAsync(GetUserId(), dto);
-                if (!updated) return NotFound();
+                if (!updated) throw new NotFoundException("User not found.");
                 return NoContent();
             }
             finally
@@ -73,7 +74,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _userService.SoftDeleteAsync(id);
-            if (!deleted) return NotFound();
+            if (!deleted) throw new NotFoundException("User not found.");
             return NoContent();
         }
 

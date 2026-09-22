@@ -101,7 +101,7 @@ public class CartService : ICartService
 
         cart = new Cart { UserId = userId };
         await _unitOfWork.Carts.AddAsync(cart);
-        await _unitOfWork.SaveChangesAsync(); // assigns CartId before the caller adds items to it
+        await _unitOfWork.SaveChangesAsync(); 
 
         return cart;
     }

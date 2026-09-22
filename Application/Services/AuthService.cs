@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Settings;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -12,6 +13,7 @@ namespace Application.Services
 {
     public class AuthService : IAuthService
     {
+        //later hide DefaultProfileUrl
         private const string DefaultProfileUrl = "https://s3.ir-thr-at1.arvanstorage.ir/shams1384/shams1384%2FDefault%20Images%2Fprofile.png";
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
@@ -35,7 +37,7 @@ namespace Application.Services
         {
             var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.PhoneNumber);
             if (existing is not null)
-                throw new InvalidOperationException("This phone number is already registered.");
+                throw new ConflictException("This phone number is already registered.");
 
             await _otpService.IssueOtpAsync(dto.PhoneNumber, OtpPurpose.Registration);
         }
@@ -44,11 +46,11 @@ namespace Application.Services
         {
             var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.PhoneNumber);
             if (existing is not null)
-                throw new InvalidOperationException("This phone number is already registered.");
+                throw new ConflictException("This phone number is already registered.");
 
             var valid = await _otpService.ConsumeOtpAsync(dto.PhoneNumber, dto.Code);
             if (!valid)
-                throw new InvalidOperationException("Invalid or expired verification code.");
+                throw new BadRequestException("Invalid or expired verification code.");
 
             var user = new User
             {
@@ -71,7 +73,7 @@ namespace Application.Services
         {
             var user = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.PhoneNumber);
             if (user is null)
-                throw new InvalidOperationException("No account found for this phone number.");
+                throw new BadRequestException("Invalid phone number or verification code.");
 
             await _otpService.IssueOtpAsync(dto.PhoneNumber, OtpPurpose.Login);
         }
@@ -80,11 +82,11 @@ namespace Application.Services
         {
             var user = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.PhoneNumber);
             if (user is null) 
-                throw new InvalidOperationException("No account found for this phone number.");
+                throw new BadRequestException("Invalid phone number or verification code.");
 
             var valid = await _otpService.ConsumeOtpAsync(dto.PhoneNumber, dto.Code);
             if (!valid) 
-                throw new InvalidOperationException("Invalid or expired verification code.");
+                throw new BadRequestException("Invalid or expired verification code.");
 
             return await IssueTokensAsync(user);
         }
@@ -93,11 +95,11 @@ namespace Application.Services
         {
             var user = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.PhoneNumber);
             if (user is null || user.PasswordHash is null)
-                throw new InvalidOperationException("Informations are not valid you sure registerd before?!");
+                throw new BadRequestException("Invalid phone number or password.");
 
             var valid = _passwordHasher.Verify(user.PasswordHash, dto.Password);
             if (!valid)
-                throw new InvalidOperationException("Invalid phone number or password.");
+                throw new BadRequestException("Invalid phone number or password.");
 
             return await IssueTokensAsync(user);
         }
@@ -107,51 +109,50 @@ namespace Application.Services
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
             if (user is null)
-                throw new InvalidOperationException("User not found.");
+                throw new NotFoundException("User not found.");
 
             if (user.PhoneNumber == dto.NewPhoneNumber)
-                throw new InvalidOperationException(
-                    "This is already your phone number.");
+                throw new ConflictException("This is already your phone number.");
 
             var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.NewPhoneNumber);
 
             if (existing is not null)
-                throw new InvalidOperationException("This phone number is already registered.");
+                throw new ConflictException("This phone number is already registered.");
 
             await _otpService.IssueOtpAsync(dto.NewPhoneNumber, OtpPurpose.ChangePhoneNumber);
         }
 
-        public async Task<bool> VerifyPhoneChangeAsync(int userId, VerifyPhoneChangeDto dto)
+        public async Task VerifyPhoneChangeAsync(int userId, VerifyPhoneChangeDto dto)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
 
-            if (user is null) return false;
+            if (user is null)
+                throw new NotFoundException("User not found.");
 
             var existing = await _unitOfWork.Users.GetByPhoneNumberAsync(dto.NewPhoneNumber);
 
-            if (existing is not null) throw new InvalidOperationException("This phone number is already registered.");
+            if (existing is not null) throw new ConflictException("This phone number is already registered.");
 
             var valid = await _otpService.ConsumeOtpAsync(dto.NewPhoneNumber, dto.Code);
 
-            if (!valid) throw new InvalidOperationException("Invalid or expired verification code.");
-
+            if (!valid)
+                throw new BadRequestException("Invalid or expired verification code.");
+            
             user.PhoneNumber = dto.NewPhoneNumber;
             user.UpdatedAt = DateTime.UtcNow;
 
             _unitOfWork.Users.Update(user);
             await _unitOfWork.SaveChangesAsync();
-
-            return true;
         }
 
         public async Task RequestAddPasswordOtpAsync(int userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user is null)
-                throw new InvalidOperationException("User not found.");
+                throw new NotFoundException("User not found.");
 
             if (!string.IsNullOrEmpty(user.PasswordHash))
-                throw new InvalidOperationException("You already have a password.");
+                throw new ConflictException("You already have a password.");
 
             await _otpService.IssueOtpAsync(user.PhoneNumber, OtpPurpose.AddPassword);
         }
@@ -215,7 +216,7 @@ namespace Application.Services
         public async Task<AuthResponseDto> ReissueTokensAsync(int userId)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId)
-                ?? throw new InvalidOperationException("User not found.");
+                       ?? throw new NotFoundException("User not found.");
 
             await _unitOfWork.RefreshTokens.RevokeAllForUserAsync(userId);
 

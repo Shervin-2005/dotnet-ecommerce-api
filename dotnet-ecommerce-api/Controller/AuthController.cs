@@ -20,49 +20,28 @@ namespace dotnet_ecommerce_api.Controller
             _authService = authService;
             _jwtSettings = jwtSettings.Value;
         }
-        // remove try catch after create global exception hanlder middleware
+        
         [HttpPost("register/request-otp")]
         public async Task<IActionResult> RequsetRegistrationOtp(RequestOtpDto dto)
-        {
-            try
-            {
-                await _authService.RequestRegistrationOtpAsync(dto);
-                return Ok(new { message = "Verification code sent." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+        { 
+            await _authService.RequestRegistrationOtpAsync(dto); 
+            return Ok(new { message = "Verification code sent." });
         }
         [HttpPost("register/verify")]
         public async Task<ActionResult<AuthResponseDto>> VerifyRegistration(VerifyRegistrationOtpDto dto)
         {
-            try
-            {
-                var response = await _authService.VerifyRegistrationOtpAsync(dto);
+            var response = await _authService.VerifyRegistrationOtpAsync(dto);
 
-                SetAuthCookies(response);
+            SetAuthCookies(response);
 
-                return Ok();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok();
         }
 
         [HttpPost("login/request-otp")]
         public async Task<IActionResult> RequestLoginOtp(RequestOtpDto dto)
         {
-            try
-            {
-                await _authService.RequestLoginOtpAsync(dto);
-                return Ok(new { message = "Verification code sent." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _authService.RequestLoginOtpAsync(dto);
+            return Ok(new { message = "Verification code sent." });
         }
 
         [HttpPost("login/otp")]
@@ -91,58 +70,36 @@ namespace dotnet_ecommerce_api.Controller
         [HttpPost("me/phone/request")]
         public async Task<IActionResult> RequestPhoneChange(RequestPhoneChangeDto dto)
         {
-            try
+            await _authService.RequestPhoneChangeAsync(GetUserId(), dto);
+            
+            return Ok(new
             {
-                await _authService.RequestPhoneChangeAsync(GetUserId(), dto);
-
-                return Ok(new
-                {
                     message = "Verification code sent to the new phone number."
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            });
         }
 
         [HttpPost("me/phone/verify")]
         public async Task<ActionResult<AuthResponseDto>> VerifyPhoneChange(VerifyPhoneChangeDto dto)
         {
-            try
-            {
-                var userId = GetUserId();
-                var result = await _authService.VerifyPhoneChangeAsync(userId, dto);
+            var userId = GetUserId(); 
+            
+            await _authService.VerifyPhoneChangeAsync(userId, dto);
 
-                if (!result)
-                    return NotFound();
+            //new tokens for new phone number
+            var response = await _authService.ReissueTokensAsync(userId);
 
-                //new tokens for new phone number
-                var response = await _authService.ReissueTokensAsync(userId);
+            SetAuthCookies(response);
 
-                SetAuthCookies(response);
-
-                return Ok();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok();
         }
 
         [Authorize]
         [HttpPost("me/password/otp")]
         public async Task<IActionResult> RequestAddPasswordOtp()
         {
-            try
-            {
-                await _authService.RequestAddPasswordOtpAsync(GetUserId());
-                return Ok(new { message = "Verification code sent." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            await _authService.RequestAddPasswordOtpAsync(GetUserId());
+            return Ok(new { message = "Verification code sent." });
         }
 
         [Authorize]
@@ -189,8 +146,7 @@ namespace dotnet_ecommerce_api.Controller
                 return BadRequest("New password must be different from the current password.");
 
             var result = await _authService.ChangePasswordAsync(GetUserId(), request.CurrentPassword, request.NewPassword);
-
-            //used an enum instead of bool because "user not found" (404) and "wrong current password" (400) need different HTTP responses
+            
             return result switch
             {
                 ChangePasswordResult.Success => NoContent(),

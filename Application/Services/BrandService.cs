@@ -52,20 +52,13 @@ namespace Application.Services
         {
             var brand = await _unitOfWork.Brands.GetByIdAsync(id);
             if (brand is null) return false;
+            
+            await _imageStorageService.DeleteAsync(brand.MainImageUrl);
 
-            try
-            {
-                await _imageStorageService.DeleteAsync(brand.MainImageUrl);
+            _unitOfWork.Brands.Delete(brand);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
 
-                _unitOfWork.Brands.Delete(brand);
-                await _unitOfWork.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-
-                throw;
-            }    
         }
 
         public async Task<IEnumerable<BrandDto>> GetAllAsync()

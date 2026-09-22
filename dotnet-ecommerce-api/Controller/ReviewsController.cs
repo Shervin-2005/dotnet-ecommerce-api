@@ -30,15 +30,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<ReviewDto>> Create(int productId, CreateReviewDto dto)
         {
-            try
-            {
-                var review = await _reviewService.CreateAsync(productId, GetUserId(), dto);
-                return CreatedAtAction(nameof(GetByProduct), new { productId }, review);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var review = await _reviewService.CreateAsync(productId, GetUserId(), dto); 
+            return CreatedAtAction(nameof(GetByProduct), new { productId }, review);
         }
 
         [Authorize]

@@ -52,21 +52,14 @@ namespace Application.Services
 
             if (category is null)
                 return false;
+            
+            await _imageStorageService.DeleteAsync(category.MainImageUrl);
 
-            try
-            {
-                await _imageStorageService.DeleteAsync(category.MainImageUrl);
+            _unitOfWork.Categories.Delete(category);
 
-                _unitOfWork.Categories.Delete(category);
-
-                await _unitOfWork.SaveChangesAsync();
-
-                return true;
-            }
-            catch
-            {
-                throw;
-            }
+            await _unitOfWork.SaveChangesAsync();
+                
+            return true;
         }
 
         public async Task<IEnumerable<CategoryDto>> GetAllAsync()

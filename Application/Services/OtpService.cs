@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Enums;
 using System.Security.Cryptography;
 using System.Text;
+using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -22,7 +23,7 @@ namespace Application.Services
         {
             var recent = await _unitOfWork.OtpVerifications.GetLatestAsync(phoneNumber);
             if (recent is not null && DateTime.UtcNow - recent.CreatedAt < ResendCooldown && recent.Purpose == purpose)
-                throw new InvalidOperationException("Please wait before requesting another code.");
+                throw new BadRequestException("Please wait before requesting another code.");
 
             // Cryptographically secure :)
             var code = RandomNumberGenerator.GetInt32(100000, 1_000_000).ToString();

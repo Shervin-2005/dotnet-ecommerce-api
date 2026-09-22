@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,10 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<BrandDto>> GetById(int id)
         {
             var brand = await _brandService.GetByIdAsync(id);
-            if (brand is null) return NotFound();
+            
+            if (brand is null) 
+                throw new NotFoundException(("Brand not found"));
+            
             return Ok(brand);
         }
 
@@ -38,15 +42,15 @@ namespace dotnet_ecommerce_api.Controller
         {
             //later should alter this with fluent validation 
             if (request.File is null || request.File.Length == 0)
-                return BadRequest("No file uploaded.");
+                throw new BadRequestException("No file uploaded.");
 
             const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
             if (request.File.Length > maxSizeBytes)
-                return BadRequest("File too large. Max size is 5 MB.");
+                throw new BadRequestException("File too large. Max size is 5 MB.");
 
             var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
             if (!allowedTypes.Contains(request.File.ContentType))
-                return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
+                throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
 
             await using var stream = request.File.OpenReadStream();
 
@@ -68,15 +72,15 @@ namespace dotnet_ecommerce_api.Controller
         {
             //later should alter this with fluent validation 
             if (request.File is null || request.File.Length == 0)
-                return BadRequest("No file uploaded.");
+                throw new BadRequestException("No file uploaded.");
 
             const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
             if (request.File.Length > maxSizeBytes)
-                return BadRequest("File too large. Max size is 5 MB.");
+                throw new BadRequestException("File too large. Max size is 5 MB.");
 
             var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
             if (!allowedTypes.Contains(request.File.ContentType))
-                return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
+                throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
 
             await using var stream = request.File.OpenReadStream();
 
@@ -89,7 +93,7 @@ namespace dotnet_ecommerce_api.Controller
             };
 
             var updated = await _brandService.UpdateAsync(id, dto);
-            if (!updated) return NotFound();
+            if (!updated) throw new NotFoundException("Brand not found.");
             return NoContent();
         }
 
@@ -98,7 +102,9 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _brandService.DeleteAsync(id);
-            if (!deleted) return NotFound();
+            
+            if(!deleted)throw new NotFoundException("Brand not found.");
+            
             return NoContent();
         }
     }

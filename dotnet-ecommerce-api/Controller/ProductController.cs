@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<ProductDto>> GetById(int id)
         {
             var product = await _productService.GetByIdAsync(id);
-            if (product is null) return NotFound();
+            if (product is null) throw new NotFoundException("Product not found.");
             return Ok(product);
         }
 
@@ -37,7 +38,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<ProductDto>> Create([FromForm]ProductRequest request)
         {
             if (request.Images.Count == 0)
-                return BadRequest("At least one image is required");
+                throw new BadRequestException("At least one image is required");
 
             const long maxSizeBytes = 5 * 1024 * 1024; //5MB
 
@@ -61,13 +62,13 @@ namespace dotnet_ecommerce_api.Controller
             foreach (var file in request.Images)
             {
                 if (file.Length == 0)
-                    return BadRequest("One of the images is empty.");
+                    throw new BadRequestException("One of the images is empty.");
 
                 if (file.Length > maxSizeBytes)
-                    return BadRequest($"'{file.FileName}' exceeds 5 MB.");
+                    throw new BadRequestException($"'{file.FileName}' exceeds 5 MB.");
 
                 if (!allowedTypes.Contains(file.ContentType))
-                    return BadRequest($"'{file.FileName}' has an unsupported format.");
+                    throw new BadRequestException($"'{file.FileName}' has an unsupported format.");
 
                 dto.Images.Add(new ProductImageDto
                 {
@@ -85,7 +86,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> Update(int id, UpdateProductDto dto)
         {
             var updated = await _productService.UpdateAsync(id, dto);
-            if (!updated) return NotFound();
+            if (!updated) throw new NotFoundException("Product not found.");
             return NoContent();
         }
 
@@ -94,7 +95,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _productService.DeleteAsync(id);
-            if (!deleted) return NotFound();
+            if (!deleted) throw new NotFoundException("Product not found.");
             return NoContent();
         }
 

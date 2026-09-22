@@ -3,6 +3,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Application.Services;
 
@@ -31,14 +32,12 @@ public class OrderService : IOrderService
     {
         var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
         if (cart is null || cart.Items.Count == 0)
-            throw new InvalidOperationException("Your cart is empty.");
-
-        //e Re-validate stock at checkout tim — the cart could have gone stale
-        // since items were added, so this can't rely on the earlier AddToCart check.
+            throw new BadRequestException("Your cart is empty.");
+        
         foreach (var item in cart.Items)
         {
             if (item.Quantity > item.Product.StockQuantity)
-                throw new InvalidOperationException(
+                throw new BadRequestException(
                     $"'{item.Product.ProductName}' only has {item.Product.StockQuantity} left in stock.");
         }
 
@@ -58,8 +57,8 @@ public class OrderService : IOrderService
             order.Items.Add(new OrderItem
             {
                 ProductId = item.ProductId,
-                ProductName = item.Product.ProductName, // snapshot
-                UnitPrice = item.Product.Price,           // snapshot
+                ProductName = item.Product.ProductName, 
+                UnitPrice = item.Product.Price,           
                 Quantity = item.Quantity
             });
 
@@ -73,9 +72,7 @@ public class OrderService : IOrderService
 
         foreach (var item in cart.Items.ToList())
             _unitOfWork.CartItems.Delete(item);
-
-        // Order + order items + stock adjustments + cart clearing all commit together,
-        // or none of them do — a partial checkout would corrupt inventory counts.
+        
         await _unitOfWork.SaveChangesAsync();
 
         return _mapper.Map<OrderDto>(order);
@@ -126,8 +123,7 @@ public class OrderService : IOrderService
 
         if (order.Status != OrderStatus.Pending)
             return OrderActionResult.InvalidStatusTransition;
-
-        // Cancelling returns the reserved inventory.
+        
         foreach (var item in order.Items)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);

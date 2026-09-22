@@ -19,26 +19,18 @@ namespace Infrastructure.Services
 
         public async Task<string> UploadAsync(Stream fileStream, string folder, string fileName, string contentType)
         {
-            try
-            {
-                string objectKey = $"{folder}/{fileName}";
-                var putRequest = new PutObjectRequest
-                {
-                    BucketName = _s3Settings.BucketName,
-                    Key = objectKey,
-                    InputStream = fileStream,
-                    ContentType = contentType,
-                    CannedACL = S3CannedACL.PublicRead
-                };
-                await _s3Client.PutObjectAsync(putRequest);
+            string objectKey = $"{folder}/{fileName}";
+            var putRequest = new PutObjectRequest
+            { 
+                BucketName = _s3Settings.BucketName,
+                Key = objectKey,
+                InputStream = fileStream,
+                ContentType = contentType,
+                CannedACL = S3CannedACL.PublicRead
+            };
+            await _s3Client.PutObjectAsync(putRequest);
 
-                return $"{_s3Settings.ServiceUrl}/{_s3Settings.BucketName}/{objectKey}";
-            }
-            catch
-            {
-                //later would alter with proper error handilng with timeout exception and as exception for dev env
-                throw new Exception("something went wrong");
-            }           
+            return $"{_s3Settings.ServiceUrl}/{_s3Settings.BucketName}/{objectKey}";
         }
 
         public async Task DeleteAsync(string fileUrl)

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Enums;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,15 +21,8 @@ namespace dotnet_ecommerce_api.Controller
         [HttpPost("checkout")]
         public async Task<ActionResult<OrderDto>> Checkout(CreateOrderDto dto)
         {
-            try
-            {
-                var order = await _orderService.CheckoutAsync(GetUserId(), dto);
-                return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, order);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var order = await _orderService.CheckoutAsync(GetUserId(), dto);
+            return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, order);
         }
 
         [HttpGet]
