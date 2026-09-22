@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Application.Settings;
+using dotnet_ecommerce_api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,9 @@ builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddHttpClient();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -151,7 +155,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
-
+app.UseExceptionHandler();
 app.UseSwagger();
 
 app.UseSwaggerUI(options => 
