@@ -14,23 +14,32 @@ namespace dotnet_ecommerce_api.Controller
     {
         private readonly IAuthService _authService;
         private readonly JwtSettings _jwtSettings;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, IOptions<JwtSettings> jwtSettings)
+        public AuthController(IAuthService authService, IOptions<JwtSettings> jwtSettings, ILogger<AuthController> logger)
         {
             _authService = authService;
             _jwtSettings = jwtSettings.Value;
+            _logger = logger;
         }
         
         [HttpPost("register/request-otp")]
         public async Task<IActionResult> RequsetRegistrationOtp(RequestOtpDto dto)
         { 
             await _authService.RequestRegistrationOtpAsync(dto); 
+            
+            _logger.LogInformation("Registration OTP requested.");
+            
             return Ok(new { message = "Verification code sent." });
         }
         [HttpPost("register/verify")]
         public async Task<ActionResult<AuthResponseDto>> VerifyRegistration(VerifyRegistrationOtpDto dto)
         {
             var response = await _authService.VerifyRegistrationOtpAsync(dto);
+            
+            _logger.LogInformation(
+                "User registration completed successfully for user {UserId}.",
+                response.UserId);
 
             SetAuthCookies(response);
 
@@ -48,8 +57,17 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<AuthResponseDto>> LoginWithOtp(LoginWithOtpDto dto)
         {
             var response = await _authService.VerifyLoginWithOtpAsync(dto);
-            if (response is null) return Unauthorized("Invalid or expired code.");
+            if (response is null)
+            {
+                _logger.LogWarning("OTP login failed due to invalid or expired OTP.");
+                
+                return Unauthorized("Invalid or expired code.");
+            }
 
+            _logger.LogInformation(
+                "User {UserId} logged in successfully using OTP.",
+                response.UserId);
+            
             SetAuthCookies(response);
 
             return Ok();
@@ -59,8 +77,16 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<ActionResult<AuthResponseDto>> LoginWithPassword(LoginWithPasswordDto dto)
         {
             var response = await _authService.LoginWithPasswordAsync(dto);
-            if (response is null) return Unauthorized("Invalid phone number or password.");
+            if (response is null)
+            {
+                _logger.LogWarning("Password login failed.");
+                return Unauthorized("Invalid phone number or password.");
+            }
 
+            _logger.LogInformation(
+                "User {UserId} logged in successfully using password.",
+                response.UserId);
+            
             SetAuthCookies(response);
 
             return Ok();
@@ -147,6 +173,14 @@ namespace dotnet_ecommerce_api.Controller
 
             var result = await _authService.ChangePasswordAsync(GetUserId(), request.CurrentPassword, request.NewPassword);
             
+            var userId = GetUserId();
+            
+            if (result == ChangePasswordResult.Success)
+            {
+                _logger.LogInformation(
+                    "Password changed successfully for user {UserId}.",
+                   userId);
+            }
             return result switch
             {
                 ChangePasswordResult.Success => NoContent(),
@@ -174,6 +208,8 @@ namespace dotnet_ecommerce_api.Controller
 
             if (response is null)
             {
+                _logger.LogWarning("Refresh token attempt failed.");
+                
                 // Remove invalid cookies
                 DeleteAuthCookies();
 

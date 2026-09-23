@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
@@ -21,11 +22,13 @@ public class OrderService : IOrderService
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ILogger<OrderService> _logger;
 
-    public OrderService(IUnitOfWork unitOfWork, IMapper mapper)
+    public OrderService(IUnitOfWork unitOfWork, IMapper mapper,  ILogger<OrderService> logger)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<OrderDto> CheckoutAsync(int userId, CreateOrderDto dto)
@@ -111,7 +114,15 @@ public class OrderService : IOrderService
         order.UpdatedAt = DateTime.UtcNow;
 
         _unitOfWork.Orders.Update(order);
+        
         await _unitOfWork.SaveChangesAsync();
+        
+        _logger.LogInformation(
+            "Order {OrderId} status changed from {OldStatus} to {NewStatus}.",
+            orderId,
+            order.Status,
+            dto.Status);
+        
         return OrderActionResult.Success;
     }
 
@@ -139,6 +150,12 @@ public class OrderService : IOrderService
 
         _unitOfWork.Orders.Update(order);
         await _unitOfWork.SaveChangesAsync();
+        
+        _logger.LogInformation(
+            "Order {OrderId} was cancelled by user {UserId}.",
+            orderId,
+            userId);
+        
         return OrderActionResult.Success;
     }
 }

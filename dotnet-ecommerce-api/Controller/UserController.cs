@@ -15,10 +15,12 @@ namespace dotnet_ecommerce_api.Controller
     public class UserController : BaseController
     {
         private readonly IUserService _userService;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ILogger <UserController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetMe()
@@ -75,6 +77,12 @@ namespace dotnet_ecommerce_api.Controller
         {
             var deleted = await _userService.SoftDeleteAsync(id);
             if (!deleted) throw new NotFoundException("User not found.");
+            
+            _logger.LogInformation(
+                "User soft deleted. AdminUserId {AdminUserId}, TargetUserId {TargetUserId}",
+                GetUserId(),
+                id);
+            
             return NoContent();
         }
 
