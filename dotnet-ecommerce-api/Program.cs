@@ -11,10 +11,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Amazon.Auth.AccessControlPolicy;
 using Application.Settings;
 using dotnet_ecommerce_api.Middleware;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
+using Serilog;
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+try
+{
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -154,8 +170,51 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource =>
+        resource.AddService("dotnet-ecommerce-api"))
+    
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint =
+                    new Uri("http://localhost:5341/ingest/otlp/v1/traces");
+
+                options.Protocol =
+                    OtlpExportProtocol.HttpProtobuf;
+            });
+    })
+
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddMeter("Microsoft.EntityFrameworkCore")
+            .AddOtlpExporter((options, metricReaderOptions) =>
+            {
+                options.Endpoint =
+                    new Uri("http://localhost:5341/ingest/otlp/v1/metrics");
+
+                options.Protocol =
+                    OtlpExportProtocol.HttpProtobuf;
+
+                metricReaderOptions
+                        .TemporalityPreference =
+                    MetricReaderTemporalityPreference.Delta;
+            });
+    });
 var app = builder.Build();
+
 app.UseExceptionHandler();
+
+app.UseSerilogRequestLogging(); 
+
 app.UseSwagger();
 
 app.UseSwaggerUI(options => 
@@ -171,3 +230,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
