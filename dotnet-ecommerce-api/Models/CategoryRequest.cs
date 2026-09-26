@@ -1,14 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace dotnet_ecommerce_api.Models;
 
-namespace dotnet_ecommerce_api.Models
+public class CategoryRequest
 {
-    public class CategoryRequest
-    {
-        [Required, StringLength(150)]
-        public string CategoryName { get; set; } = null!;
-
-        [Required]
-        public IFormFile File { get; set; } = null!;
-
-    }
+    public string CategoryName { get; set; } = null!;
+    public IFormFile File { get; set; } = null!;
 }
