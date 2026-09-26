@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
-namespace Application.DTOs;
+namespace Application.DTOs.Order;
 
 public class UpdateOrderStatusDto
 {
-    [Required]
     public OrderStatus Status { get; set; }
 }
