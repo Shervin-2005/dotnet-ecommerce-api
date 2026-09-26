@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Product;
 
 namespace Application.Interfaces
 {

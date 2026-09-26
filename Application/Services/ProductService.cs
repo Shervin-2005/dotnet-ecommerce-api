@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Product;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
