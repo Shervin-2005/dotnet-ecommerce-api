@@ -50,6 +50,9 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> RequestLoginOtp(RequestOtpDto dto)
         {
             await _authService.RequestLoginOtpAsync(dto);
+            
+            _logger.LogInformation("Login OTP requested.");
+            
             return Ok(new { message = "Verification code sent." });
         }
 
@@ -123,7 +126,6 @@ namespace dotnet_ecommerce_api.Controller
         [HttpPost("me/password/otp")]
         public async Task<IActionResult> RequestAddPasswordOtp()
         {
-
             await _authService.RequestAddPasswordOtpAsync(GetUserId());
             return Ok(new { message = "Verification code sent." });
         }
@@ -132,16 +134,6 @@ namespace dotnet_ecommerce_api.Controller
         [HttpPost("me/password")]
         public async Task<IActionResult> AddPassword(AddPasswordDto dto)
         {
-            //later should alter this with fluent validation 
-            if (string.IsNullOrWhiteSpace(dto.NewPassword) || string.IsNullOrWhiteSpace(dto.Otp))
-                return BadRequest("New password and OTP are required.");
-
-            if (dto.NewPassword != dto.ConfirmNewPassword)
-                return BadRequest("New password and confirmation do not match.");
-
-            if (dto.NewPassword.Length < 8)
-                return BadRequest("New password must be at least 8 characters long.");
-
             var result = await _authService.VerifyAddPasswordAsync(GetUserId(), dto.Otp, dto.NewPassword);
 
             return result switch
@@ -158,19 +150,6 @@ namespace dotnet_ecommerce_api.Controller
         [HttpPut("me")]
         public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
         {
-            //later should alter this with fluent validation 
-            if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
-                return BadRequest("Current and new password are required.");
-
-            if (request.NewPassword != request.ConfirmNewPassword)
-                return BadRequest("New password and confirmation do not match.");
-
-            if (request.NewPassword.Length < 8)
-                return BadRequest("New password must be at least 8 characters long.");
-
-            if (request.CurrentPassword == request.NewPassword)
-                return BadRequest("New password must be different from the current password.");
-
             var result = await _authService.ChangePasswordAsync(GetUserId(), request.CurrentPassword, request.NewPassword);
             
             var userId = GetUserId();
