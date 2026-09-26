@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Application.DTOs;
+using Application.DTOs.Cart;
 using Application.Interfaces;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
