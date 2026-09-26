@@ -1,4 +1,4 @@
-using Application.DTOs;
+using Application.DTOs.Payment;
 using Domain.Enums;
 
 namespace Application.Interfaces;
