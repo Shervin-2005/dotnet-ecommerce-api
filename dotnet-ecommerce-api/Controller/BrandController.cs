@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Brand;
 using Application.Interfaces;
 using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
