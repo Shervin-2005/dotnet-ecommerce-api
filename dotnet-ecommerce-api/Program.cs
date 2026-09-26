@@ -13,12 +13,16 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Amazon.Auth.AccessControlPolicy;
 using Application.Settings;
+using Application.Validators.Auth;
 using dotnet_ecommerce_api.Middleware;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Exporter;
 using Serilog;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -54,6 +58,9 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<VerifyRegistrationOtpDtoValidator>();
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddProblemDetails();
