@@ -11,7 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Amazon.Auth.AccessControlPolicy;
+using Application.Jobs;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Application.Settings;
 using Application.Validators.Auth;
 using dotnet_ecommerce_api.Middleware;
@@ -53,6 +55,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderCleanupJob, OrderCleanupJob>();
 builder.Services.AddScoped<IPaymentGateway, MockPaymentGateway>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
@@ -60,6 +63,11 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasherService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<VerifyRegistrationOtpDtoValidator>();
+
+builder.Services.AddHangfire(config =>
+    config.UsePostgreSqlStorage(connectionString));
+
+builder.Services.AddHangfireServer();
 
 builder.Services.AddHttpClient();
 
@@ -217,6 +225,20 @@ builder.Services.AddOpenTelemetry()
             });
     });
 var app = builder.Build();
+
+app.UseHangfireDashboard();
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider
+        .GetRequiredService<IRecurringJobManager>();
+
+    recurringJobManager.AddOrUpdate<IOrderCleanupJob>(
+        "cancel-expired-pending-orders",
+        job => job.CancelExpiredPendingOrdersAsync(),
+        "*/5 * * * *");
+}
+
 
 app.UseExceptionHandler();
 
