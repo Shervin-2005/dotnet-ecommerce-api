@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
     public async Task<Order?> GetByIdWithDetailsAsync(int orderId) =>
         await _dbSet
             .Include(o => o.Items)
+            .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
     public async Task<List<Order>> GetByUserIdAsync(int userId) =>
@@ -28,4 +30,16 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
             .Include(o => o.Items)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
+    
+    public async Task<List<Order>> GetPendingOrdersOlderThanAsync(
+        DateTime expirationTime)
+    {
+        return await _dbSet
+            .Include(o => o.Items)
+            .ThenInclude(i => i.Product)
+            .Where(o =>
+                o.Status == OrderStatus.Pending &&
+                o.CreatedAt <= expirationTime)
+            .ToListAsync();
+    }
 }
