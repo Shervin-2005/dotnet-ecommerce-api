@@ -11,4 +11,5 @@ public interface IOrderService
     Task<(OrderActionResult Result, OrderDto? Order)> GetOrderDetailAsync(int orderId, int userId, bool isAdmin);
     Task<OrderActionResult> UpdateStatusAsync(int orderId, UpdateOrderStatusDto dto);
     Task<OrderActionResult> CancelAsync(int orderId, int userId);
+    Task CancelExpiredPendingOrdersAsync();
 }

@@ -110,6 +110,8 @@ public class OrderService : IOrderService
         if (!AllowedTransitions[order.Status].Contains(dto.Status))
             return OrderActionResult.InvalidStatusTransition;
 
+        var oldStatus = order.Status;
+        
         order.Status = dto.Status;
         order.UpdatedAt = DateTime.UtcNow;
 
@@ -120,7 +122,7 @@ public class OrderService : IOrderService
         _logger.LogInformation(
             "Order {OrderId} status changed from {OldStatus} to {NewStatus}.",
             orderId,
-            order.Status,
+            oldStatus,
             dto.Status);
         
         return OrderActionResult.Success;
@@ -137,12 +139,8 @@ public class OrderService : IOrderService
         
         foreach (var item in order.Items)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-            if (product is not null)
-            {
-                product.StockQuantity += item.Quantity;
-                product.SoldQuantity -= item.Quantity;
-            }
+            item.Product.StockQuantity += item.Quantity;
+            item.Product.SoldQuantity -= item.Quantity;
         }
 
         order.Status = OrderStatus.Cancelled;
@@ -157,5 +155,29 @@ public class OrderService : IOrderService
             userId);
         
         return OrderActionResult.Success;
+    }
+
+    public async Task CancelExpiredPendingOrdersAsync()
+    {
+        var expirationTime = DateTime.UtcNow.AddMinutes(-30);
+
+        var orders = await _unitOfWork.Orders
+            .GetPendingOrdersOlderThanAsync(expirationTime);
+
+        foreach (var order in orders)
+        {
+            if (order.Status != OrderStatus.Pending) continue;
+            
+            foreach (var item in order.Items)
+            {
+                item.Product.StockQuantity += item.Quantity;
+                item.Product.SoldQuantity -= item.Quantity;
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            order.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _unitOfWork.SaveChangesAsync();
     }
 }
