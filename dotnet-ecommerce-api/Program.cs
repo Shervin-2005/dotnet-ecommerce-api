@@ -51,6 +51,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IImageStorageService, S3FileStorageService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IOtpCleanupJob, OtpCleanupJob>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ICartService, CartService>();
@@ -237,6 +238,11 @@ using (var scope = app.Services.CreateScope())
         "cancel-expired-pending-orders",
         job => job.CancelExpiredPendingOrdersAsync(),
         "*/5 * * * *");
+    
+    recurringJobManager.AddOrUpdate<IOtpCleanupJob>(
+        "delete-old-otps",
+        job => job.DeleteExpiredOtpsAsync(),
+        "0 3 * * *");
 }
 
 
