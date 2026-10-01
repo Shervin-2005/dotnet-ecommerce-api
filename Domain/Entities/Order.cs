@@ -12,6 +12,8 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
  
+    public Guid Version { get; set; } = Guid.NewGuid();
+    
     public User User { get; set; } = null!;
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }

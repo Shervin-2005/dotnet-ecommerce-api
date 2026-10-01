@@ -22,6 +22,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.ShippingAddress)
             .HasMaxLength(500);
 
+        builder.Property(o => o.Version)
+            .IsConcurrencyToken();
+        
         builder.HasOne(o => o.User)
             .WithMany()
             .HasForeignKey(o => o.UserId)
