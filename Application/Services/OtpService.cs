@@ -54,6 +54,21 @@ namespace Application.Services
             return true;
         }
 
+        public async Task DeleteExpiredOtpsAsync()
+        {
+            var expirationTime = DateTime.UtcNow.AddDays(-3);
+
+            var otps = await _unitOfWork.OtpVerifications
+                .GetOlderThanAsync(expirationTime);
+
+            foreach (var otp in otps)
+            {
+                _unitOfWork.OtpVerifications.Delete(otp);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         private static string Hash(string input)
         {
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
