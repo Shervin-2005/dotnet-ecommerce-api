@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
@@ -117,7 +118,19 @@ public class OrderService : IOrderService
 
         _unitOfWork.Orders.Update(order);
         
-        await _unitOfWork.SaveChangesAsync();
+        try
+        {
+            await _unitOfWork.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Concurrency conflict while updating Order {OrderId}.",
+                orderId);
+
+            return OrderActionResult.InvalidStatusTransition;
+        }
         
         _logger.LogInformation(
             "Order {OrderId} status changed from {OldStatus} to {NewStatus}.",
@@ -137,18 +150,31 @@ public class OrderService : IOrderService
         if (order.Status != OrderStatus.Pending)
             return OrderActionResult.InvalidStatusTransition;
         
-        foreach (var item in order.Items)
-        {
-            item.Product.StockQuantity += item.Quantity;
-            item.Product.SoldQuantity -= item.Quantity;
+        try
+        { 
+            foreach (var item in order.Items)
+            { 
+                item.Product.StockQuantity += item.Quantity; 
+                item.Product.SoldQuantity -= item.Quantity;
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            order.UpdatedAt = DateTime.UtcNow;
+
+             _unitOfWork.Orders.Update(order);
+            await _unitOfWork.SaveChangesAsync();
+            
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Concurrency conflict while cancelling Order {OrderId} by UserId {UserId}.",
+                orderId,
+                userId);
 
-        order.Status = OrderStatus.Cancelled;
-        order.UpdatedAt = DateTime.UtcNow;
-
-        _unitOfWork.Orders.Update(order);
-        await _unitOfWork.SaveChangesAsync();
-        
+            return OrderActionResult.InvalidStatusTransition;
+        }
         _logger.LogInformation(
             "Order {OrderId} was cancelled by user {UserId}.",
             orderId,
@@ -159,25 +185,36 @@ public class OrderService : IOrderService
 
     public async Task CancelExpiredPendingOrdersAsync()
     {
-        var expirationTime = DateTime.UtcNow.AddMinutes(-30);
-
-        var orders = await _unitOfWork.Orders
-            .GetPendingOrdersOlderThanAsync(expirationTime);
-
-        foreach (var order in orders)
+        try
         {
-            if (order.Status != OrderStatus.Pending) continue;
+            var expirationTime = DateTime.UtcNow.AddMinutes(-30);
             
-            foreach (var item in order.Items)
+            var orders = await _unitOfWork.Orders
+                .GetPendingOrdersOlderThanAsync(expirationTime);
+
+            foreach (var order in orders)
             {
-                item.Product.StockQuantity += item.Quantity;
-                item.Product.SoldQuantity -= item.Quantity;
+                if (order.Status != OrderStatus.Pending) continue;
+            
+                foreach (var item in order.Items)
+                {
+                    item.Product.StockQuantity += item.Quantity;
+                    item.Product.SoldQuantity -= item.Quantity;
+                }
+
+                order.Status = OrderStatus.Cancelled;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.Version = Guid.NewGuid();
             }
 
-            order.Status = OrderStatus.Cancelled;
-            order.UpdatedAt = DateTime.UtcNow;
+       
+            await _unitOfWork.SaveChangesAsync();
+            
         }
-
-        await _unitOfWork.SaveChangesAsync();
+        catch (DbUpdateConcurrencyException ex)
+        {
+                _logger.LogWarning(
+                    ex, "Concurrency conflict while cancelling expired orders.");
+        }
     }
 }

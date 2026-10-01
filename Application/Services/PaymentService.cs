@@ -3,6 +3,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
@@ -70,6 +71,8 @@ public class PaymentService : IPaymentService
         {
             order.Status = OrderStatus.Paid;
             order.UpdatedAt = DateTime.UtcNow;
+            order.Version = Guid.NewGuid();
+            
             _unitOfWork.Orders.Update(order);
             
             _logger.LogInformation( "Payment succeeded for OrderId {OrderId}," +
@@ -83,7 +86,19 @@ public class PaymentService : IPaymentService
                                 " FailureReason {FailureReason}",
                 orderId, result.TransactionId, result.FailureReason);
         }
-        await _unitOfWork.SaveChangesAsync();
+        
+        try
+        {
+            await _unitOfWork.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            _logger.LogWarning(
+                "Concurrency conflict while processing payment for OrderId {OrderId}.",
+                orderId);
+
+            return (PaymentActionResult.OrderNotPayable, null);
+        }
 
         return result.IsSuccess
             ? (PaymentActionResult.Success, _mapper.Map<PaymentDto>(payment))
