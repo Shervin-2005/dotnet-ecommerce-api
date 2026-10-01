@@ -46,7 +46,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("BrandId");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
@@ -71,7 +71,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CartItem", b =>
@@ -104,7 +104,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CartId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("CartItems", t =>
+                    b.ToTable("CartItems", null, t =>
                         {
                             t.HasCheckConstraint("CK_CartItem_Quantity_Positive", "\"Quantity\" > 0");
                         });
@@ -134,7 +134,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -171,7 +171,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
@@ -206,7 +206,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems", t =>
+                    b.ToTable("OrderItems", null, t =>
                         {
                             t.HasCheckConstraint("CK_OrderItem_Quantity_Positive", "\"Quantity\" > 0");
                         });
@@ -250,7 +250,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PhoneNumber", "CreatedAt");
 
-                    b.ToTable("OtpVerifications");
+                    b.ToTable("OtpVerifications", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Payment", b =>
@@ -298,7 +298,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("TransactionId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -346,7 +346,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
@@ -379,7 +379,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImage");
+                    b.ToTable("ProductImage", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductReview", b =>
@@ -417,7 +417,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ProductId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ProductReview", t =>
+                    b.ToTable("ProductReview", null, t =>
                         {
                             t.HasCheckConstraint("CK_ProductReview_Rating_Range", "\"Rating\" >= 1 AND \"Rating\" <= 5");
                         });
@@ -458,7 +458,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshToken", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -522,7 +522,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("\"IsDeleted\" = false");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
