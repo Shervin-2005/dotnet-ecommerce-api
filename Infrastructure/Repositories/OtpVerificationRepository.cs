@@ -16,5 +16,12 @@ namespace Infrastructure.Repositories
                 .Where(o => o.PhoneNumber == phoneNumber)
                 .OrderByDescending(o => o.CreatedAt)
                 .FirstOrDefaultAsync();
+        
+        public async Task<List<OtpVerification>> GetOlderThanAsync(DateTime date)
+        {
+            return await _dbSet
+                .Where(x => x.CreatedAt < date)
+                .ToListAsync();
+        }
     }
 }
