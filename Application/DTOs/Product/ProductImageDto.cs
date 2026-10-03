@@ -1,11 +1,8 @@
-﻿namespace Application.DTOs.Product
+namespace Application.DTOs.Product;
+
+public class ProductImageDto
 {
-    public class ProductImageDto
-    {
-        public Stream Image { get; set; } = null!;
-        public string ImageName { get; set; } = string.Empty;
-        public string ContentType { get; set; } = string.Empty;
-        public bool IsMain { get; set; }
-        public int DisplayOrder { get; set; }
-    }
+    public string ImageUrl { get; set; } = null!;
+    public bool IsMain { get; set; }
+    public int DisplayOrder { get; set; }
 }
