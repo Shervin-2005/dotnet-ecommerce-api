@@ -3,7 +3,7 @@ using Application.DTOs.Product;
 
 namespace Application.Validators.Product;
 
-public class ProductImageDtoValidator : AbstractValidator<ProductImageDto>
+public class ProductImageDtoValidator : AbstractValidator<ProductImageUploadDto>
 {
     public ProductImageDtoValidator()
     {

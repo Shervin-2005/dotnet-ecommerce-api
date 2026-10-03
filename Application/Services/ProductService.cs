@@ -56,7 +56,10 @@ namespace Application.Services
 
                 await _unitOfWork.SaveChangesAsync();
                 
-                return _mapper.Map<ProductDto>(product);
+                var createdProduct = await _unitOfWork.Products.GetWithDetailsAsync(
+                    product.ProductId);
+                
+                return _mapper.Map<ProductDto>(createdProduct);
             }
             catch
             {
@@ -87,7 +90,7 @@ namespace Application.Services
 
         public async Task<IEnumerable<ProductDto>> GetAllAsync()
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllWithDetailsAsync();
             var productList = products.ToList();
 
             var dtos = _mapper.Map<List<ProductDto>>(productList);
@@ -124,7 +127,7 @@ namespace Application.Services
 
         public async Task<bool> UpdateAsync(int id, UpdateProductDto dto)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
             if (product is null) return false;
 
             _mapper.Map(dto, product);
@@ -133,7 +136,7 @@ namespace Application.Services
             return true;
         }
        
-        public async Task<bool> AddImageAsync(int id, ProductImageDto dto)
+        public async Task<bool> AddImageAsync(int id, ProductImageUploadDto uploadDto)
         {
             var product = await _unitOfWork.Products.GetWithDetailsAsync(id);
             if (product is null) return false;
@@ -141,21 +144,21 @@ namespace Application.Services
             string? imageUrl = null;
             try
             {
-                await using var image = dto.Image;
+                await using var image = uploadDto.Image;
 
-                var targetOrder = Math.Clamp(dto.DisplayOrder, 0, product.Images.Count);
+                var targetOrder = Math.Clamp(uploadDto.DisplayOrder, 0, product.Images.Count);
                 foreach (var existing in product.Images.Where(i => i.DisplayOrder >= targetOrder))
                     existing.DisplayOrder += 1;
 
                 var folderId = product.ImageFolderId;
-                var extension = Path.GetExtension(dto.ImageName);
+                var extension = Path.GetExtension(uploadDto.ImageName);
                 var imageName = $"{Guid.NewGuid()}{extension}";
 
                 imageUrl = await _imageStorageService.UploadAsync(
-                    image, $"Products/{product.ImageFolderId}", imageName, dto.ContentType);
+                    image, $"Products/{product.ImageFolderId}", imageName, uploadDto.ContentType);
 
                 // Only one image can be main
-                if (dto.IsMain)
+                if (uploadDto.IsMain)
                 {
                     foreach (var existing in product.Images)
                         existing.IsMain = false;
@@ -165,14 +168,14 @@ namespace Application.Services
                 {
                     ProductId = product.ProductId,
                     ImageUrl = imageUrl,
-                    IsMain = dto.IsMain,
-                    DisplayOrder = dto.DisplayOrder
+                    IsMain = uploadDto.IsMain,
+                    DisplayOrder = uploadDto.DisplayOrder
                 };
 
                 await _unitOfWork.ProductImages.AddAsync(productImage);
                 await _unitOfWork.SaveChangesAsync();
 
-                _mapper.Map<ProductImageDto>(productImage);
+                _mapper.Map<ProductImageUploadDto>(productImage);
 
                 return true;
             }

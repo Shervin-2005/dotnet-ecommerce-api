@@ -13,6 +13,9 @@
         public int BrandId { get; set; }
         public string? BrandName { get; set; }
         public double AverageRating { get; set; }
+
+        public List<ProductImageDto> Images { get; set; } = null!;
+        
         public int ReviewCount { get; set; }
     }
 }

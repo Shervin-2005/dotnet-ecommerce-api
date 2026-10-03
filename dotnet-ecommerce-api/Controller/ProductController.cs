@@ -70,7 +70,7 @@ namespace dotnet_ecommerce_api.Controller
                 if (!allowedTypes.Contains(file.ContentType))
                     throw new BadRequestException($"'{file.FileName}' has an unsupported format.");
 
-                dto.Images.Add(new ProductImageDto
+                dto.Images.Add(new ProductImageUploadDto
                 {
                     Image = file.OpenReadStream(),
                     ImageName = file.FileName,
@@ -101,7 +101,7 @@ namespace dotnet_ecommerce_api.Controller
 
         [HttpPost("{id:int}/images")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductImageDto>> AddImage(int id, IFormFile file, [FromForm] bool isMain = false, [FromForm] int displayOrder = 0)
+        public async Task<ActionResult<ProductImageUploadDto>> AddImage(int id, IFormFile file, [FromForm] bool isMain = false, [FromForm] int displayOrder = 0)
         {
             //later should alter this with fluent validation 
             if (file is null || file.Length == 0)
@@ -117,7 +117,7 @@ namespace dotnet_ecommerce_api.Controller
 
             await using var stream = file.OpenReadStream();
 
-            var upload = new ProductImageDto
+            var upload = new ProductImageUploadDto
             {
                 Image = stream,
                 ImageName = file.FileName,

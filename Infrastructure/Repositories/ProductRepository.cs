@@ -20,5 +20,14 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Brand)
             .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
+        
+        public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Images)
+                .ToListAsync();
+        }
     }
 }

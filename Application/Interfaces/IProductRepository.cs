@@ -6,5 +6,6 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId);
         Task<Product?> GetWithDetailsAsync(int id);
+        Task<IEnumerable<Product>> GetAllWithDetailsAsync();
     }
 }

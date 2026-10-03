@@ -8,5 +8,5 @@ public class CreateProductDto
     public int StockQuantity { get; set; }
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
-    public List<ProductImageDto> Images { get; set; } = [];
+    public List<ProductImageUploadDto> Images { get; set; } = [];
 }
