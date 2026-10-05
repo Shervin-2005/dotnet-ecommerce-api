@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Domain.Entities;
 
 public class ProductReview
@@ -8,6 +10,8 @@ public class ProductReview
     public int Rating { get; set; }
 
     public string Comment { get; set; } = null!;
+    public ReviewStatus Status { get; set; } = ReviewStatus.Pending;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; }
     
