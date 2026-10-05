@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,9 @@ namespace Infrastructure.Repositories
 
         public async Task<List<ProductReview>> GetByProductAsync(int productId) =>
             await _dbSet
-                .Where(r => r.ProductId == productId)
+                .Where(r =>
+                    r.ProductId == productId &&
+                    r.Status == ReviewStatus.Approved)
                 .Include(r => r.User)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -26,7 +29,9 @@ namespace Infrastructure.Repositories
             var idList = productIds.ToList();
 
             var summaries = await _dbSet
-                .Where(r => idList.Contains(r.ProductId))
+                .Where(r =>
+                    idList.Contains(r.ProductId) &&
+                    r.Status == ReviewStatus.Approved)
                 .GroupBy(r => r.ProductId)
                 .Select(g => new
                 {
@@ -35,8 +40,22 @@ namespace Infrastructure.Repositories
                     Count = g.Count()
                 })
                 .ToListAsync();
-
+            
             return summaries.ToDictionary(s => s.ProductId, s => (s.Average, s.Count));
         }
+        
+        public async Task<List<ProductReview>> GetPendingAsync() =>
+            await _dbSet
+                .Where(r => r.Status == ReviewStatus.Pending)
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderBy(r => r.CreatedAt)
+                .ToListAsync();
+
+        public async Task<ProductReview?> GetByIdWithUserAsync(int reviewId) =>
+            await _dbSet
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .FirstOrDefaultAsync(r => r.ProductReviewId == reviewId);
     }
 }

@@ -9,5 +9,9 @@ namespace Application.Interfaces
         Task<List<ProductReview>> GetByProductAsync(int productId);
         
         Task<Dictionary<int, (double AverageRating, int Count)>> GetRatingSummariesAsync(IEnumerable<int> productIds);
+        
+        Task<List<ProductReview>> GetPendingAsync();
+
+        Task<ProductReview?> GetByIdWithUserAsync(int reviewId);
     }
 }
