@@ -76,5 +76,52 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             return ReviewActionResult.Success;
         }
+        
+        public async Task<IEnumerable<ReviewDto>> GetPendingAsync()
+        {
+            var reviews = await _unitOfWork.Reviews.GetPendingAsync();
+
+            return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+        }
+        
+        public async Task<ReviewActionResult> ApproveAsync(int reviewId)
+        {
+            var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);
+
+            if (review == null)
+                return ReviewActionResult.NotFound;
+
+            if (review.Status != ReviewStatus.Pending)
+                return ReviewActionResult.Forbidden;
+
+            review.Status = ReviewStatus.Approved;
+            review.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Reviews.Update(review);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return ReviewActionResult.Success;
+        }
+        
+        public async Task<ReviewActionResult> RejectAsync(int reviewId)
+        {
+            var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);
+
+            if (review == null)
+                return ReviewActionResult.NotFound;
+
+            if (review.Status != ReviewStatus.Pending)
+                return ReviewActionResult.Forbidden;
+
+            review.Status = ReviewStatus.Rejected;
+            review.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Reviews.Update(review);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return ReviewActionResult.Success;
+        }
     }
 }
