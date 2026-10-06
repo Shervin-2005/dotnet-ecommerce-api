@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -240,5 +241,34 @@ namespace Application.Services
             return true;
         }
 
+        public async Task<bool> SetSpecificationsAsync(int productId, List<UpsertProductSpecificationDto> specs)
+        {
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(productId);
+            if (product is null) return false;
+
+            if (specs.Count > 30)
+                throw new BadRequestException("A product can have a maximum of 30 specifications.");
+
+            if (specs.Count(x => x.IsMain) > 10)
+                throw new BadRequestException("A product can have a maximum of 10 main specifications.");
+            
+            foreach (var existing in product.Specifications.ToList())
+                _unitOfWork.ProductSpecifications.Delete(existing);
+
+            foreach (var spec in specs)
+            {
+                await _unitOfWork.ProductSpecifications.AddAsync(new ProductSpecification
+                {
+                    ProductId = productId,
+                    Key = spec.Key,
+                    Value = spec.Value,
+                    DisplayOrder = spec.DisplayOrder,
+                    IsMain = spec.IsMain
+                });
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
     }
 }
