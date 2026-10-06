@@ -14,6 +14,7 @@
         ICartItemRepository CartItems { get; }
         IOrderRepository Orders { get; }
         IPaymentRepository Payments { get; }
+        IProductSpecificationRepository ProductSpecifications { get; }
         Task<int> SaveChangesAsync();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Entities;
 using Infrastructure.Repositories;
 using Infrastructure.Data;
 
@@ -19,6 +20,7 @@ namespace Infrastructure.Repositories
         private ICartItemRepository? _cartItems;
         private IOrderRepository? _orders;
         private IPaymentRepository? _payments;
+        private IProductSpecificationRepository?  _productSpecifications;
         
         public UnitOfWork(AppDbContext context)
         {
@@ -37,6 +39,8 @@ namespace Infrastructure.Repositories
         public ICartItemRepository CartItems =>  _cartItems ??= new CartItemRepository(_context);
         public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
         public IPaymentRepository Payments => _payments ??= new PaymentRepository(_context);
+        public IProductSpecificationRepository ProductSpecifications =>
+            _productSpecifications ??= new ProductSpecificationRepository(_context);
         
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
         public void Dispose() => _context.Dispose();
