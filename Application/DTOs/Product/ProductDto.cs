@@ -4,7 +4,8 @@
     {
         public int ProductId {  get; set; }
         public string ProductName { get; set; } = null!;
-        public decimal Price { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public decimal? SalePrice { get; set; }
         public string Description { get; set; } = null!;
         public int StockQuantity { get; set; }
         public int SoldQuantity { get; set; }

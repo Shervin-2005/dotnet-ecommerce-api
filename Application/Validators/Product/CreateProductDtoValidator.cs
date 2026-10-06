@@ -13,7 +13,11 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
             .MaximumLength(150)
             .WithMessage("Product name cannot be longer than 150 characters.");
 
-        RuleFor(x => x.Price)
+        RuleFor(x => x.OriginalPrice)
+            .GreaterThan(0)
+            .WithMessage("Price must be greater than 0.");
+        
+        RuleFor(x => x.SalePrice)
             .GreaterThan(0)
             .WithMessage("Price must be greater than 0.");
 

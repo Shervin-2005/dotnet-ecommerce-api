@@ -52,7 +52,8 @@ namespace dotnet_ecommerce_api.Controller
             var dto = new CreateProductDto
             {
                 ProductName = request.ProductName,
-                Price = request.Price,
+                OriginalPrice = request.OriginalPrice,
+                SalePrice = request.SalePrice,
                 Description = request.Description,
                 StockQuantity = request.StockQuantity,
                 CategoryId = request.CategoryId,

@@ -56,13 +56,13 @@ public class OrderService : IOrderService
 
         foreach (var item in cart.Items)
         {
-            total += item.Product.Price * item.Quantity;
+            total += item.Product.SalePrice * item.Quantity;
 
             order.Items.Add(new OrderItem
             {
                 ProductId = item.ProductId,
                 ProductName = item.Product.ProductName, 
-                UnitPrice = item.Product.Price,           
+                UnitPrice = item.Product.SalePrice,           
                 Quantity = item.Quantity
             });
 
