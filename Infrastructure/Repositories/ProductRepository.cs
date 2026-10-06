@@ -18,7 +18,8 @@ namespace Infrastructure.Repositories
             await _dbSet
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-            .Include(p => p.Images)
+                .Include(p => p.Images)
+                .Include(p => p.Specifications)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         
         public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
@@ -27,6 +28,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
+                .Include(p => p.Specifications)
                 .ToListAsync();
         }
     }

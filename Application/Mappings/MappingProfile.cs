@@ -29,6 +29,9 @@ namespace Application.Mappings
 
             //ProductImage
             CreateMap<ProductImage, ProductImageDto>();
+            
+            //ProductSpecification
+            CreateMap<ProductSpecification, ProductSpecificationDto>();
 
             // Brand
             CreateMap<Brand, BrandDto>();
