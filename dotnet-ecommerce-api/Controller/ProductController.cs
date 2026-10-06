@@ -148,5 +148,14 @@ namespace dotnet_ecommerce_api.Controller
             if (!updated) return NotFound();
             return NoContent();
         }
+        [HttpPut("{id:int}/specifications")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SetSpecifications(int id, List<UpsertProductSpecificationDto> specs)
+        {
+            var updated = await _productService.SetSpecificationsAsync(id, specs);
+            if (!updated) return NotFound();
+            return NoContent();
+        }
+
     }
 }
