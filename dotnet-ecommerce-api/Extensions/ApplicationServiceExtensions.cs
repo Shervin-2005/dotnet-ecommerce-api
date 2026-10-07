@@ -9,6 +9,7 @@ public static class ApplicationServiceExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IProductVariantService, ProductVariantService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAuthService, AuthService>();
