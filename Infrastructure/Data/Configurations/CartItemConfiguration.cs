@@ -9,12 +9,30 @@ namespace Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<CartItem> builder)
         {
             builder.HasKey(ci => ci.CartItemId);
-            
-            builder.HasIndex(ci => new { ci.CartId, ci.ProductId }).IsUnique();
 
-            builder.Property(ci => ci.Quantity).IsRequired();
+            builder.HasIndex(ci => new
+                {
+                    ci.CartId,
+                    ci.ProductId
+                })
+                .IsUnique()
+                .HasFilter("\"ProductVariantId\" IS NULL");
 
-            builder.ToTable(t => t.HasCheckConstraint("CK_CartItem_Quantity_Positive", "\"Quantity\" > 0"));
+            builder.HasIndex(ci => new
+                {
+                    ci.CartId,
+                    ci.ProductId,
+                    ci.ProductVariantId
+                })
+                .IsUnique()
+                .HasFilter("\"ProductVariantId\" IS NOT NULL");
+
+            builder.Property(ci => ci.Quantity)
+                .IsRequired();
+
+            builder.ToTable(t => t.HasCheckConstraint(
+                "CK_CartItem_Quantity_Positive",
+                "\"Quantity\" > 0"));
 
             builder.HasOne(ci => ci.Cart)
                 .WithMany(c => c.Items)
@@ -24,7 +42,12 @@ namespace Infrastructure.Data.Configurations
             builder.HasOne(ci => ci.Product)
                 .WithMany()
                 .HasForeignKey(ci => ci.ProductId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(ci => ci.ProductVariant)
+                .WithMany()
+                .HasForeignKey(ci => ci.ProductVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
