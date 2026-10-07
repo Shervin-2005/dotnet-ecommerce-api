@@ -158,5 +158,15 @@ namespace dotnet_ecommerce_api.Controller
             return NoContent();
         }
 
+        [HttpPut("{id:int}/attributes")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SetAttributes(int id, SetProductAttributesDto dto)
+        {
+            var updated = await _productService.SetAttributesAsync(id, dto);
+
+            if (!updated) return NotFound();
+
+            return NoContent();
+        }
     }
 }

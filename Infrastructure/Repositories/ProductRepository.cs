@@ -20,6 +20,11 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
                 .Include(p => p.Specifications)
+                .Include(p => p.Attributes)
+                .ThenInclude(a => a.Values)
+                .Include(p => p.Variants)
+                .ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductAttribute)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         
         public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
@@ -29,6 +34,11 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
                 .Include(p => p.Specifications)
+                .Include(p => p.Attributes)
+                .ThenInclude(a => a.Values)
+                .Include(p => p.Variants)
+                .ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductAttribute)
                 .ToListAsync();
         }
     }

@@ -13,5 +13,6 @@ namespace Application.Interfaces
         Task<bool> RemoveImageAsync(int productId, int imageId);
         Task<bool> SetMainImageAsync(int productId, int imageId);
         Task<bool> SetSpecificationsAsync(int productId, List<UpsertProductSpecificationDto> specs);
+        Task<bool> SetAttributesAsync(int productId, SetProductAttributesDto dto);
     }
 }

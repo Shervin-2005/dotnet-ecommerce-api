@@ -272,5 +272,44 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> SetAttributesAsync(int productId, SetProductAttributesDto dto)
+        {
+            var product = await _unitOfWork.Products.GetWithDetailsAsync(productId);
+
+            if (product is null)
+                return false;
+
+            if (product.Variants.Any())
+                throw new BadRequestException("Product attributes cannot be changed while variants exist.");
+
+            foreach (var existing in product.Attributes.ToList())
+            {
+                _unitOfWork.ProductAttributes.Delete(existing);
+            }
+
+            foreach (var attributeDto in dto.Attributes)
+            {
+                var attribute = new ProductAttribute
+                {
+                    ProductId = productId,
+                    Name = attributeDto.Name.Trim()
+                };
+
+                foreach (var value in attributeDto.Values)
+                {
+                    attribute.Values.Add(new ProductAttributeValue
+                    {
+                        Value = value.Trim()
+                    });
+                }
+
+                await _unitOfWork.ProductAttributes.AddAsync(attribute);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

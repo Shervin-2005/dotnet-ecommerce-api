@@ -18,7 +18,7 @@
         
         public List<ProductImageDto> Images { get; set; } = null!;
         public List<ProductSpecificationDto> Specifications { get; set; } = new();
-        
-        
+        public List<ProductAttributeDto> Attributes { get; set; } = new();
+        public List<ProductVariantDto> Variants { get; set; } = new();   
     }
 }
