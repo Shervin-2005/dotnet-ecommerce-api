@@ -5,7 +5,8 @@ namespace Domain.Enums
         Success,
         ProductNotFound,
         OutOfStock,
-        ItemNotFound
+        ItemNotFound,
+        ProductVariantNotFound
     }
 }
 

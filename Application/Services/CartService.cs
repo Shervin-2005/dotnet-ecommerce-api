@@ -20,20 +20,44 @@ public class CartService : ICartService
     public async Task<CartDto> GetCartAsync(int userId)
     {
         var cart = await GetOrCreateCartAsync(userId);
+
         return _mapper.Map<CartDto>(cart);
     }
 
     public async Task<CartActionResult> AddItemAsync(int userId, AddToCartDto dto)
     {
         var product = await _unitOfWork.Products.GetByIdAsync(dto.ProductId);
-        if (product is null) return CartActionResult.ProductNotFound;
+
+        if (product is null)
+            return CartActionResult.ProductNotFound;
+
+        ProductVariant? variant = null;
+
+        if (dto.ProductVariantId.HasValue)
+        {
+            variant = product.Variants.FirstOrDefault(v => v.ProductVariantId == dto.ProductVariantId.Value);
+
+            if (variant is null)
+                return CartActionResult.ProductVariantNotFound;
+        }
+        else if (product.Variants.Any())
+        {
+            return CartActionResult.ProductVariantNotFound;
+        }
 
         var cart = await GetOrCreateCartAsync(userId);
 
-        var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == dto.ProductId);
-        var requestedTotalQuantity = (existingItem?.Quantity ?? 0) + dto.Quantity;
+        var existingItem = cart.Items.FirstOrDefault(i =>
+            i.ProductId == dto.ProductId &&
+            i.ProductVariantId == dto.ProductVariantId);
 
-        if (requestedTotalQuantity > product.StockQuantity)
+        var requestedTotalQuantity =
+            (existingItem?.Quantity ?? 0) + dto.Quantity;
+
+        var availableStock =
+            variant?.StockQuantity ?? product.StockQuantity;
+
+        if (requestedTotalQuantity > availableStock)
             return CartActionResult.OutOfStock;
 
         if (existingItem is not null)
@@ -47,46 +71,73 @@ public class CartService : ICartService
             {
                 CartId = cart.CartId,
                 ProductId = dto.ProductId,
+                ProductVariantId = dto.ProductVariantId,
                 Quantity = dto.Quantity
             };
+
             await _unitOfWork.CartItems.AddAsync(newItem);
         }
 
         cart.UpdatedAt = DateTime.UtcNow;
+
         await _unitOfWork.SaveChangesAsync();
+
         return CartActionResult.Success;
     }
 
-    public async Task<CartActionResult> UpdateQuantityAsync(int userId, int cartItemId, UpdateCartItemDto dto)
+    public async Task<CartActionResult> UpdateQuantityAsync(
+        int userId,
+        int cartItemId,
+        UpdateCartItemDto dto)
     {
         var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
-        var item = cart?.Items.FirstOrDefault(i => i.CartItemId == cartItemId);
-        if (item is null) return CartActionResult.ItemNotFound;
 
-        if (dto.Quantity > item.Product.StockQuantity)
+        var item = cart?.Items.FirstOrDefault(
+            i => i.CartItemId == cartItemId);
+
+        if (item is null)
+            return CartActionResult.ItemNotFound;
+
+        var availableStock =
+            item.ProductVariant?.StockQuantity
+            ?? item.Product.StockQuantity;
+
+        if (dto.Quantity > availableStock)
             return CartActionResult.OutOfStock;
 
         item.Quantity = dto.Quantity;
         item.UpdatedAt = DateTime.UtcNow;
+
         await _unitOfWork.SaveChangesAsync();
+
         return CartActionResult.Success;
     }
 
-    public async Task<CartActionResult> RemoveItemAsync(int userId, int cartItemId)
+    public async Task<CartActionResult> RemoveItemAsync(
+        int userId,
+        int cartItemId)
     {
         var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
-        var item = cart?.Items.FirstOrDefault(i => i.CartItemId == cartItemId);
-        if (item is null) return CartActionResult.ItemNotFound;
+
+        var item = cart?.Items.FirstOrDefault(
+            i => i.CartItemId == cartItemId);
+
+        if (item is null)
+            return CartActionResult.ItemNotFound;
 
         _unitOfWork.CartItems.Delete(item);
+
         await _unitOfWork.SaveChangesAsync();
+
         return CartActionResult.Success;
     }
 
     public async Task ClearCartAsync(int userId)
     {
         var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
-        if (cart is null || cart.Items.Count == 0) return;
+
+        if (cart is null || cart.Items.Count == 0)
+            return;
 
         foreach (var item in cart.Items.ToList())
             _unitOfWork.CartItems.Delete(item);
@@ -97,11 +148,18 @@ public class CartService : ICartService
     private async Task<Cart> GetOrCreateCartAsync(int userId)
     {
         var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
-        if (cart is not null) return cart;
 
-        cart = new Cart { UserId = userId };
+        if (cart is not null)
+            return cart;
+
+        cart = new Cart
+        {
+            UserId = userId
+        };
+
         await _unitOfWork.Carts.AddAsync(cart);
-        await _unitOfWork.SaveChangesAsync(); 
+
+        await _unitOfWork.SaveChangesAsync();
 
         return cart;
     }
