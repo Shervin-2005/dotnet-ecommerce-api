@@ -3,9 +3,13 @@
     public interface IUnitOfWork : IDisposable
     {
         IProductRepository Products { get; }
+        IProductImageRepository ProductImages { get; }
+        IProductSpecificationRepository ProductSpecifications { get; }
+        IProductVariantRepository ProductVariants { get; }
+        IProductAttributeRepository ProductAttributes { get; }
+        IProductAttributeValueRepository ProductAttributeValues { get; }
         IBrandRepository Brands { get; }
         ICategoryRepository Categories { get; }
-        IProductImageRepository ProductImages { get; }
         IUserRepository Users {  get; }
         IOtpVerificationRepository OtpVerifications { get; }
         IRefreshTokenRepository? RefreshTokens {  get; }
@@ -14,7 +18,6 @@
         ICartItemRepository CartItems { get; }
         IOrderRepository Orders { get; }
         IPaymentRepository Payments { get; }
-        IProductSpecificationRepository ProductSpecifications { get; }
         Task<int> SaveChangesAsync();
     }
 }
