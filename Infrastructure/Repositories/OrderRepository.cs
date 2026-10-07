@@ -16,27 +16,33 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
         await _dbSet
             .Include(o => o.Items)
             .ThenInclude(i => i.Product)
+            .Include(o => o.Items)
+            .ThenInclude(i => i.ProductVariant)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
     public async Task<List<Order>> GetByUserIdAsync(int userId) =>
         await _dbSet
             .Where(o => o.UserId == userId)
             .Include(o => o.Items)
+            .ThenInclude(i => i.ProductVariant)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
 
     public async Task<List<Order>> GetAllWithDetailsAsync() =>
         await _dbSet
             .Include(o => o.Items)
+            .ThenInclude(i => i.ProductVariant)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
-    
+
     public async Task<List<Order>> GetPendingOrdersOlderThanAsync(
         DateTime expirationTime)
     {
         return await _dbSet
             .Include(o => o.Items)
             .ThenInclude(i => i.Product)
+            .Include(o => o.Items)
+            .ThenInclude(i => i.ProductVariant)
             .Where(o =>
                 o.Status == OrderStatus.Pending &&
                 o.CreatedAt <= expirationTime)

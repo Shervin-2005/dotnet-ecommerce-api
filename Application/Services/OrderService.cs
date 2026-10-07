@@ -40,9 +40,14 @@ public class OrderService : IOrderService
         
         foreach (var item in cart.Items)
         {
-            if (item.Quantity > item.Product.StockQuantity)
-                throw new BadRequestException(
-                    $"'{item.Product.ProductName}' only has {item.Product.StockQuantity} left in stock.");
+            var availableStock = item.ProductVariant?.StockQuantity ?? item.Product.StockQuantity;
+
+            if (item.Quantity > availableStock)
+            {
+                var productName = item.Product.ProductName;
+                
+                throw new BadRequestException($"'{productName}' only has {availableStock} left in stock.");
+            }
         }
 
         var order = new Order
@@ -56,18 +61,32 @@ public class OrderService : IOrderService
 
         foreach (var item in cart.Items)
         {
-            total += item.Product.SalePrice * item.Quantity;
+            var unitPrice = item.ProductVariant?.SalePrice ?? item.Product.SalePrice;
+
+            total += unitPrice * item.Quantity;
 
             order.Items.Add(new OrderItem
             {
                 ProductId = item.ProductId,
-                ProductName = item.Product.ProductName, 
-                UnitPrice = item.Product.SalePrice,           
+                ProductVariantId = item.ProductVariantId,
+
+                ProductName = item.Product.ProductName,
+                VariantSku = item.ProductVariant?.Sku,
+
+                UnitPrice = unitPrice,
                 Quantity = item.Quantity
             });
 
-            item.Product.StockQuantity -= item.Quantity;
-            item.Product.SoldQuantity += item.Quantity;
+            if (item.ProductVariant is not null)
+            {
+                item.ProductVariant.StockQuantity -= item.Quantity;
+                item.ProductVariant.SoldQuantity += item.Quantity;
+            }
+            else
+            {
+                item.Product.StockQuantity -= item.Quantity;
+                item.Product.SoldQuantity += item.Quantity;
+            }
         }
 
         order.TotalAmount = total;
@@ -153,9 +172,17 @@ public class OrderService : IOrderService
         try
         { 
             foreach (var item in order.Items)
-            { 
-                item.Product.StockQuantity += item.Quantity; 
-                item.Product.SoldQuantity -= item.Quantity;
+            {
+                if (item.ProductVariant is not null)
+                {
+                    item.ProductVariant.StockQuantity += item.Quantity;
+                    item.ProductVariant.SoldQuantity -= item.Quantity;
+                }
+                else
+                {
+                    item.Product.StockQuantity += item.Quantity;
+                    item.Product.SoldQuantity -= item.Quantity;
+                }
             }
 
             order.Status = OrderStatus.Cancelled;
@@ -198,10 +225,17 @@ public class OrderService : IOrderService
             
                 foreach (var item in order.Items)
                 {
-                    item.Product.StockQuantity += item.Quantity;
-                    item.Product.SoldQuantity -= item.Quantity;
+                    if (item.ProductVariant is not null)
+                    {
+                        item.ProductVariant.StockQuantity += item.Quantity;
+                        item.ProductVariant.SoldQuantity -= item.Quantity;
+                    }
+                    else
+                    {
+                        item.Product.StockQuantity += item.Quantity;
+                        item.Product.SoldQuantity -= item.Quantity;
+                    }
                 }
-
                 order.Status = OrderStatus.Cancelled;
                 order.UpdatedAt = DateTime.UtcNow;
                 order.Version = Guid.NewGuid();
