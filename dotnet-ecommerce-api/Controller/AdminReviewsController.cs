@@ -4,7 +4,7 @@ using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.Admin;
+namespace dotnet_ecommerce_api.Controller;
 
 [ApiController]
 [Route("api/admin/reviews")]
