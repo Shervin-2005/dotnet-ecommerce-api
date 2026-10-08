@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+﻿using Application.DTOs.UserAndAuth;
 using Domain.Entities;
 using Domain.Enums;
 

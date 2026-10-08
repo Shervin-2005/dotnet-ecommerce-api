@@ -1,4 +1,4 @@
-﻿namespace Application.DTOs.Auth
+﻿namespace Application.DTOs.UserAndAuth
 {
     public class AddPasswordDto
     {

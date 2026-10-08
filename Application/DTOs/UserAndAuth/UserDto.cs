@@ -1,7 +1,7 @@
 ﻿
 using Domain.Enums;
 
-namespace Application.DTOs.Auth
+namespace Application.DTOs.UserAndAuth
 {
     public class UserDto
     {

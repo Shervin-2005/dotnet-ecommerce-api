@@ -1,8 +1,5 @@
-﻿using Application.DTOs;
-using Application.DTOs.Auth;
+﻿using Application.DTOs.UserAndAuth;
 using Application.Interfaces;
-using Application.Services;
-using Domain.Enums;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

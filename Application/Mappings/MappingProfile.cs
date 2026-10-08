@@ -4,7 +4,7 @@ using Application.DTOs.Cart;
 using Application.DTOs.Order;
 using Application.DTOs.Review;
 using Application.DTOs.Payment;
-using Application.DTOs.Auth;
+using Application.DTOs.UserAndAuth;
 using Application.DTOs.Brand;
 using AutoMapper;
 using Domain.Entities;

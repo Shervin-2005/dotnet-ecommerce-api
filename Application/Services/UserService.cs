@@ -1,5 +1,5 @@
 ﻿using Application.DTOs;
-using Application.DTOs.Auth;
+using Application.DTOs.UserAndAuth;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;

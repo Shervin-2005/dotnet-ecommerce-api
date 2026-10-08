@@ -1,7 +1,7 @@
-using Application.DTOs.Auth;
+using Application.DTOs.UserAndAuth;
 using FluentValidation;
 
-namespace Application.Validators.Auth;
+namespace Application.Validators.UserAndAuth;
 
 public class RequestOtpDtoValidator : AbstractValidator<RequestOtpDto>
 {

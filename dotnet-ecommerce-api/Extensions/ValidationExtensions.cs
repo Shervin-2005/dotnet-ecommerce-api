@@ -1,4 +1,4 @@
-using Application.Validators.Auth;
+using Application.Validators.UserAndAuth;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
