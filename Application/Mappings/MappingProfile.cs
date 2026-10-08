@@ -53,6 +53,11 @@ namespace Application.Mappings
             // User
             CreateMap<User, UserDto>();
             
+            //User's Address
+            CreateMap<UserAddress, UserAddressDto>();
+            CreateMap<CreateUserAddressDto, UserAddress>();
+            CreateMap<UpdateUserAddressDto, UserAddress>();
+            
             // Review
             CreateMap<ProductReview, ReviewDto>()
                 .ForMember(
