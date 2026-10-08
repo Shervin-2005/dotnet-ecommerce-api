@@ -16,6 +16,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<IOtpCleanupJob, OtpCleanupJob>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserAddressService, UserAddressService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IOrderService, OrderService>();
