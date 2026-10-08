@@ -8,7 +8,12 @@ public class Order
     public int UserId { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal TotalAmount { get; set; }
-    public string? ShippingAddress { get; set; }
+    public string RecipientName { get; set; } = null!;
+    public string PhoneNumber { get; set; } = null!;
+    public string Province { get; set; } = null!;
+    public string City { get; set; } = null!;
+    public string AddressLine { get; set; } = null!;
+    public string PostalCode { get; set; } = null!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
  

@@ -4,21 +4,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class OrderConfiguration : IEntityTypeConfiguration<Order>
+public class UserAddressConfiguration
+    : IEntityTypeConfiguration<UserAddress>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    public void Configure(EntityTypeBuilder<UserAddress> builder)
     {
-        builder.HasKey(o => o.OrderId);
+        builder.HasKey(x => x.UserAddressId);
 
-        builder.Property(o => o.Status)
+        builder.Property(x => x.Title)
             .IsRequired()
-            .HasConversion<string>() 
-            .HasMaxLength(20);
+            .HasMaxLength(50);
 
-        builder.Property(o => o.TotalAmount)
-            .IsRequired()
-            .HasPrecision(18, 2);
-        
         builder.Property(x => x.RecipientName)
             .IsRequired()
             .HasMaxLength(100);
@@ -43,12 +39,16 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .IsRequired()
             .HasMaxLength(20);
 
-        builder.Property(o => o.Version)
-            .IsConcurrencyToken();
-        
-        builder.HasOne(o => o.User)
+        builder.Property(x => x.IsDefault)
+            .IsRequired();
+
+        builder.HasOne(x => x.User)
             .WithMany()
-            .HasForeignKey(o => o.UserId)
-            .OnDelete(DeleteBehavior.Restrict); 
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(x => x.UserId)
+            .IsUnique()
+            .HasFilter("\"IsDefault\" = true");
     }
 }
