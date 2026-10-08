@@ -11,6 +11,7 @@
         IBrandRepository Brands { get; }
         ICategoryRepository Categories { get; }
         IUserRepository Users {  get; }
+        IUserAddressRepository UserAddresses { get; }
         IOtpVerificationRepository OtpVerifications { get; }
         IRefreshTokenRepository? RefreshTokens {  get; }
         IReviewRepository Reviews { get; }

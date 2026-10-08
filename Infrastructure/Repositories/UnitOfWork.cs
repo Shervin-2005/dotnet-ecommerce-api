@@ -17,6 +17,7 @@ namespace Infrastructure.Repositories
         private IBrandRepository _brands;
         private ICategoryRepository _categories;
         private IUserRepository _userRepository;
+        private IUserAddressRepository _userAddresses;
         private IOtpVerificationRepository? _otpVerifications;
         private IRefreshTokenRepository? _refreshTokens;
         private IReviewRepository? _reviews;
@@ -37,6 +38,7 @@ namespace Infrastructure.Repositories
         public IBrandRepository Brands => _brands ??= new BrandRepository(_context);
         public ICategoryRepository Categories =>_categories ??= new CategoryRepository(_context);
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
+        public IUserAddressRepository  UserAddresses => _userAddresses ??= new UserAddressRepository(_context);
         public IOtpVerificationRepository OtpVerifications => _otpVerifications ??= new OtpVerificationRepository(_context);
         public IRefreshTokenRepository RefreshTokens => _refreshTokens ??= new RefreshTokenRepository(_context);
         public IReviewRepository Reviews => _reviews ??= new ReviewRepository(_context);
