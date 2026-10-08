@@ -2,5 +2,5 @@ namespace Application.DTOs.Order;
 
 public class CreateOrderDto
 {
-    public string? ShippingAddress { get; set; }
+    public int UserAddressId { get; set; }
 }

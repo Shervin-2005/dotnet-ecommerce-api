@@ -33,73 +33,86 @@ public class OrderService : IOrderService
     }
 
     public async Task<OrderDto> CheckoutAsync(int userId, CreateOrderDto dto)
+{
+    var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
+
+    if (cart is null || cart.Items.Count == 0)
+        throw new BadRequestException("Your cart is empty.");
+
+    var address =
+        await _unitOfWork.UserAddresses.GetByIdAndUserIdAsync(dto.UserAddressId, userId);
+
+    if (address is null)
+        throw new NotFoundException("Address not found.");
+
+    foreach (var item in cart.Items)
     {
-        var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
-        if (cart is null || cart.Items.Count == 0)
-            throw new BadRequestException("Your cart is empty.");
-        
-        foreach (var item in cart.Items)
-        {
-            var availableStock = item.ProductVariant?.StockQuantity ?? item.Product.StockQuantity;
+        var availableStock = item.ProductVariant?.StockQuantity ?? item.Product.StockQuantity;
 
-            if (item.Quantity > availableStock)
-            {
-                var productName = item.Product.ProductName;
-                
-                throw new BadRequestException($"'{productName}' only has {availableStock} left in stock.");
-            }
+        if (item.Quantity > availableStock)
+        {
+            var productName = item.Product.ProductName;
+
+            throw new BadRequestException($"'{productName}' only has {availableStock} left in stock.");
         }
-
-        var order = new Order
-        {
-            UserId = userId,
-            Status = OrderStatus.Pending,
-            ShippingAddress = dto.ShippingAddress
-        };
-
-        decimal total = 0;
-
-        foreach (var item in cart.Items)
-        {
-            var unitPrice = item.ProductVariant?.SalePrice ?? item.Product.SalePrice;
-
-            total += unitPrice * item.Quantity;
-
-            order.Items.Add(new OrderItem
-            {
-                ProductId = item.ProductId,
-                ProductVariantId = item.ProductVariantId,
-
-                ProductName = item.Product.ProductName,
-                VariantSku = item.ProductVariant?.Sku,
-
-                UnitPrice = unitPrice,
-                Quantity = item.Quantity
-            });
-
-            if (item.ProductVariant is not null)
-            {
-                item.ProductVariant.StockQuantity -= item.Quantity;
-                item.ProductVariant.SoldQuantity += item.Quantity;
-            }
-            else
-            {
-                item.Product.StockQuantity -= item.Quantity;
-                item.Product.SoldQuantity += item.Quantity;
-            }
-        }
-
-        order.TotalAmount = total;
-
-        await _unitOfWork.Orders.AddAsync(order);
-
-        foreach (var item in cart.Items.ToList())
-            _unitOfWork.CartItems.Delete(item);
-        
-        await _unitOfWork.SaveChangesAsync();
-
-        return _mapper.Map<OrderDto>(order);
     }
+
+    var order = new Order
+    {
+        UserId = userId,
+        Status = OrderStatus.Pending,
+
+        RecipientName = address.RecipientName,
+        PhoneNumber = address.PhoneNumber,
+        Province = address.Province,
+        City = address.City,
+        AddressLine = address.AddressLine,
+        PostalCode = address.PostalCode
+    };
+
+    decimal total = 0;
+
+    foreach (var item in cart.Items)
+    {
+        var unitPrice = item.ProductVariant?.SalePrice ?? item.Product.SalePrice;
+
+        total += unitPrice * item.Quantity;
+
+        order.Items.Add(new OrderItem
+        {
+            ProductId = item.ProductId,
+            ProductVariantId = item.ProductVariantId,
+
+            ProductName = item.Product.ProductName,
+            VariantSku = item.ProductVariant?.Sku,
+
+            UnitPrice = unitPrice,
+            Quantity = item.Quantity
+        });
+
+        if (item.ProductVariant is not null)
+        {
+            item.ProductVariant.StockQuantity -= item.Quantity;
+            item.ProductVariant.SoldQuantity += item.Quantity;
+        }
+        else
+        {
+            item.Product.StockQuantity -= item.Quantity;
+            item.Product.SoldQuantity += item.Quantity;
+        }
+    }
+
+    order.TotalAmount = total;
+
+    await _unitOfWork.Orders.AddAsync(order);
+
+    foreach (var item in cart.Items.ToList())
+        _unitOfWork.CartItems.Delete(item);
+
+    await _unitOfWork.SaveChangesAsync();
+
+    return _mapper.Map<OrderDto>(order);
+}
 
     public async Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId)
     {

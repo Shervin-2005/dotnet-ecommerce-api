@@ -1,15 +1,14 @@
 using Application.DTOs.Order;
 using FluentValidation;
 
-namespace Application.Validators;
+namespace Application.Validators.Order;
 
 public class CreateOrderDtoValidator : AbstractValidator<CreateOrderDto>
 {
     public CreateOrderDtoValidator()
     {
-        RuleFor(x => x.ShippingAddress)
-            .MaximumLength(500)
-            .WithMessage("Shipping address cannot be longer than 500 characters.")
-            .When(x => x.ShippingAddress is not null);
+        RuleFor(x => x.UserAddressId)
+            .GreaterThan(0)
+            .WithMessage("A valid user address must be selected.");
     }
 }
