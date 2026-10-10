@@ -6,6 +6,7 @@ using Application.DTOs.Review;
 using Application.DTOs.Payment;
 using Application.DTOs.UserAndAuth;
 using Application.DTOs.Brand;
+using Application.DTOs.OfferCode;
 using AutoMapper;
 using Domain.Entities;
 
@@ -111,6 +112,11 @@ namespace Application.Mappings
             
             //Payment
             CreateMap<Payment, PaymentDto>();
+            
+            //OfferCode
+            CreateMap<OfferCode, OfferCodeDto>();
+            CreateMap<CreateOfferCodeDto, OfferCode>();
+            CreateMap<UpdateOfferCodeDto, OfferCode>();
         }
     }
 }
