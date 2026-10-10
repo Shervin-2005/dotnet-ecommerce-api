@@ -17,7 +17,15 @@ public static class MiddlewarePipelineExtensions
         });
 
         app.UseHttpsRedirection();
-
+        
+        app.UseRouting();
+        
+        app.UseCors(options => options
+            .WithOrigins("http://localhost:3001") 
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+        
         app.UseAuthentication();
         app.UseAuthorization();
 
