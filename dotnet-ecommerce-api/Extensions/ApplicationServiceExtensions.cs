@@ -22,6 +22,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IOrderCleanupJob, OrderCleanupJob>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IOfferCodeService, OfferCodeService>();
 
         return services;
     }
