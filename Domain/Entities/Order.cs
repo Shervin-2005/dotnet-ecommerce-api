@@ -7,6 +7,8 @@ public class Order
     public int OrderId { get; set; }
     public int UserId { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
+    public decimal SubtotalAmount { get; set; }
+    public decimal DiscountAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public string RecipientName { get; set; } = null!;
     public string PhoneNumber { get; set; } = null!;
@@ -21,4 +23,5 @@ public class Order
     
     public User User { get; set; } = null!;
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+    public OfferCodeUsage? OfferCodeUsage { get; set; }
 }

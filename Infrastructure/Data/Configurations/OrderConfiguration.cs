@@ -15,7 +15,15 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasConversion<string>() 
             .HasMaxLength(20);
 
-        builder.Property(o => o.TotalAmount)
+        builder.Property(x => x.SubtotalAmount)
+            .IsRequired()
+            .HasPrecision(18, 2);
+
+        builder.Property(x => x.DiscountAmount)
+            .IsRequired()
+            .HasPrecision(18, 2);
+
+        builder.Property(x => x.TotalAmount)
             .IsRequired()
             .HasPrecision(18, 2);
         
