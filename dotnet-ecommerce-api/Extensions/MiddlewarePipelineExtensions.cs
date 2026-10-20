@@ -4,6 +4,25 @@ namespace dotnet_ecommerce_api.Extensions;
 
 public static class MiddlewarePipelineExtensions
 {
+    public const string ReactCorsPolicy = "ReactCorsPolicy";
+
+    public static IServiceCollection AddReactCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(ReactCorsPolicy, policy =>
+            {
+                policy
+                    .WithOrigins("http://localhost:3001")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
+        return services;
+    }
+
     public static WebApplication UseApplicationMiddleware(this WebApplication app)
     {
         app.UseExceptionHandler();
@@ -13,19 +32,16 @@ public static class MiddlewarePipelineExtensions
         app.UseSwaggerUI(options =>
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+
             options.RoutePrefix = string.Empty;
         });
 
         app.UseHttpsRedirection();
-        
+
         app.UseRouting();
-        
-        app.UseCors(options => options
-            .WithOrigins("http://localhost:3001") 
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials());
-        
+
+        app.UseCors(ReactCorsPolicy);
+
         app.UseAuthentication();
         app.UseAuthorization();
 
