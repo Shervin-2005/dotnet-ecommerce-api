@@ -41,12 +41,16 @@ public class ProductVariantService : IProductVariantService
         if (VariantCombinationExists(product.Variants, attributeValues)) 
             throw new BadRequestException("This variant combination already exists.");
 
+        var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
+
         var variant = new ProductVariant
         {
             ProductId = productId,
             Sku = dto.Sku.Trim(),
             OriginalPrice = dto.OriginalPrice,
-            SalePrice = dto.SalePrice ?? dto.OriginalPrice,
+            SalePrice = sale.SalePrice,
+            SaleStartAt = sale.SaleStartAt,
+            SaleEndAt = sale.SaleEndAt,
             StockQuantity = dto.StockQuantity
         };
 
@@ -107,9 +111,13 @@ public class ProductVariantService : IProductVariantService
         if (VariantCombinationExists(otherVariants, attributeValues))
             throw new BadRequestException("This variant combination already exists.");
         
+        var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
+
         variant.Sku = sku;
         variant.OriginalPrice = dto.OriginalPrice;
-        variant.SalePrice = dto.SalePrice ?? dto.OriginalPrice;
+        variant.SalePrice = sale.SalePrice;
+        variant.SaleStartAt = sale.SaleStartAt;
+        variant.SaleEndAt = sale.SaleEndAt;
         variant.StockQuantity = dto.StockQuantity;
 
         variant.AttributeValues.Clear();

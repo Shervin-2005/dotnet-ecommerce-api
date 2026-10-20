@@ -26,8 +26,13 @@ namespace Application.Services
             try
             {
                 var product = _mapper.Map<Product>(dto);
-                product.SalePrice = dto.SalePrice ?? dto.OriginalPrice;
 
+                var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
+
+                product.SalePrice = sale.SalePrice;
+                product.SaleStartAt = sale.SaleStartAt;
+                product.SaleEndAt = sale.SaleEndAt;
+                
                 product.ImageFolderId = Guid.NewGuid();
                 int displayOrder = 1;
 
@@ -133,7 +138,13 @@ namespace Application.Services
             if (product is null) return false;
 
             _mapper.Map(dto, product);
-            product.SalePrice = dto.SalePrice ?? dto.OriginalPrice;
+
+            var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
+
+            product.SalePrice = sale.SalePrice;
+            product.SaleStartAt = sale.SaleStartAt;
+            product.SaleEndAt = sale.SaleEndAt;
+            
             _unitOfWork.Products.Update(product);
             await _unitOfWork.SaveChangesAsync();
             return true;
