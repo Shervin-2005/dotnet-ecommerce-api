@@ -19,6 +19,9 @@ namespace Infrastructure.Data
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<SupportConversation> SupportConversations = null!;
+        public DbSet<SupportMessage> SupportMessages = null!;
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
