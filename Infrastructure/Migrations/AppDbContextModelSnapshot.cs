@@ -491,9 +491,15 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<DateTime?>("SaleEndAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("SalePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("SaleStartAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("SoldQuantity")
                         .ValueGeneratedOnAdd()
@@ -686,9 +692,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("SaleEndAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("SalePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("SaleStartAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Sku")
                         .IsRequired()
