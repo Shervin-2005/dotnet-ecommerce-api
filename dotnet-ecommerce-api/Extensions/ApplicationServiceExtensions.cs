@@ -24,6 +24,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IOfferCodeService, OfferCodeService>();
         services.AddScoped<ISupportChatService, SupportChatService>();
+        services.AddScoped<ISupportChatCleanupJob, SupportChatCleanupJob>();
         return services;
     }
 }
