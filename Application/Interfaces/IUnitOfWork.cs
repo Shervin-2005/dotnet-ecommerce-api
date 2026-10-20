@@ -20,6 +20,8 @@
         IOrderRepository Orders { get; }
         IPaymentRepository Payments { get; }
         IOfferCodeRepository OfferCodes { get; }
+        ISupportConversationRepository SupportConversations { get; }
+        ISupportMessageRepository SupportMessages { get; }
         Task<int> SaveChangesAsync();
     }
 }
