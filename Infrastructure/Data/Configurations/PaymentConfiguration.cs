@@ -24,8 +24,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.FailureReason).HasMaxLength(500);
 
         builder.HasIndex(p => p.TransactionId).IsUnique();
-
-        // An order can have several payment rows — failed attempts plus a successful retry.
+        
         builder.HasOne(p => p.Order)
             .WithMany()
             .HasForeignKey(p => p.OrderId)
