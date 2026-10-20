@@ -9,5 +9,7 @@ namespace Application.Interfaces
         Task<SupportConversation?> GetWithUsersAsync(int conversationId);
 
         Task<List<SupportConversation>> GetAllWithUsersAsync();
+        
+        Task<int> DeleteExpiredClosedAsync(DateTime cutoffDate);
     }
 }

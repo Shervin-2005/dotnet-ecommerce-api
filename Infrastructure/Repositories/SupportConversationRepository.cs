@@ -38,5 +38,15 @@ namespace Infrastructure.Repositories
                 .OrderByDescending(conversation => conversation.CreatedAt)
                 .ToListAsync();
         }
+        
+        public Task<int> DeleteExpiredClosedAsync(DateTime cutoffDate)
+        {
+            return _context.SupportConversations
+                .Where(conversation =>
+                    conversation.Status == SupportConversationStatus.Closed &&
+                    conversation.ClosedAt != null &&
+                    conversation.ClosedAt <= cutoffDate)
+                .ExecuteDeleteAsync();
+        }
     }
 }
