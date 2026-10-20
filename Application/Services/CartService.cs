@@ -21,7 +21,36 @@ public class CartService : ICartService
     {
         var cart = await GetOrCreateCartAsync(userId);
 
-        return _mapper.Map<CartDto>(cart);
+        var utcNow = DateTime.UtcNow;
+
+        var cartDto = _mapper.Map<CartDto>(cart);
+
+        foreach (var itemDto in cartDto.Items)
+        {
+            var item = cart.Items.First(i => i.CartItemId == itemDto.CartItemId);
+
+            var unitPrice = item.ProductVariant is not null
+                ? SalePricingHelper.GetEffectivePrice(
+                    item.ProductVariant.OriginalPrice,
+                    item.ProductVariant.SalePrice,
+                    item.ProductVariant.SaleStartAt,
+                    item.ProductVariant.SaleEndAt,
+                    utcNow)
+                : SalePricingHelper.GetEffectivePrice(
+                    item.Product.OriginalPrice,
+                    item.Product.SalePrice,
+                    item.Product.SaleStartAt,
+                    item.Product.SaleEndAt,
+                    utcNow);
+
+            itemDto.UnitPrice = unitPrice;
+            itemDto.LineTotal = unitPrice * item.Quantity;
+        }
+
+        cartDto.TotalPrice = cartDto.Items.Sum(item => item.LineTotal);
+        cartDto.TotalItems = cartDto.Items.Sum(item => item.Quantity);
+
+        return cartDto;
     }
 
     public async Task<CartActionResult> AddItemAsync(int userId, AddToCartDto dto)
