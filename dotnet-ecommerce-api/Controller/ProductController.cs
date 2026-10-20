@@ -17,7 +17,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll()
         {
             var products = await _productService.GetAllAsync();
@@ -25,7 +24,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> GetById(int id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -143,6 +141,7 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("{productId:int}/images/{imageId:int}/main")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SetMainImage(int productId, int imageId)
         {
             var updated = await _productService.SetMainImageAsync(productId, imageId);

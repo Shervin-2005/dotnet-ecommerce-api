@@ -17,7 +17,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetAll()
         {
             var brands = await _brandService.GetAllAsync();
@@ -25,7 +24,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<BrandDto>> GetById(int id)
         {
             var brand = await _brandService.GetByIdAsync(id);
