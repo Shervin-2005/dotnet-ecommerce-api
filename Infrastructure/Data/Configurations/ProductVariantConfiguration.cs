@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations;
 
-public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVariant>
+public class ProductVariantConfiguration
+    : IEntityTypeConfiguration<ProductVariant>
 {
     public void Configure(EntityTypeBuilder<ProductVariant> builder)
     {
@@ -18,10 +19,20 @@ public class ProductVariantConfiguration : IEntityTypeConfiguration<ProductVaria
             .IsUnique();
 
         builder.Property(x => x.OriginalPrice)
+            .IsRequired()
             .HasPrecision(18, 2);
 
         builder.Property(x => x.SalePrice)
+            .IsRequired()
             .HasPrecision(18, 2);
+
+        builder.Property(x => x.SaleStartAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
+
+        builder.Property(x => x.SaleEndAt)
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
 
         builder.Property(x => x.StockQuantity)
             .IsRequired();

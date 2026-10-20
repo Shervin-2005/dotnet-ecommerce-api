@@ -16,6 +16,10 @@ public class ProductVariant
 
     public int SoldQuantity { get; set; }
 
+    public DateTime? SaleStartAt { get; set; }
+
+    public DateTime? SaleEndAt { get; set; }
+    
     public Product Product { get; set; } = null!;
 
     public ICollection<ProductAttributeValue> AttributeValues { get; set; } = new List<ProductAttributeValue>();
