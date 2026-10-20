@@ -30,6 +30,11 @@ public static class HangfireExtensions
             "delete-old-otps",
             job => job.DeleteExpiredOtpsAsync(),
             "0 3 * * *");
+        
+        recurringJobManager.AddOrUpdate<ISupportChatCleanupJob>(
+            "delete-expired-support-conversations",
+            job => job.DeleteExpiredClosedConversationsAsync(),
+            Cron.Daily);
 
         return app;
     }
