@@ -35,64 +35,66 @@ public class OrderService : IOrderService
         _offerCodeService = offerCodeService;
     }
 
-   public async Task<OrderDto> CheckoutAsync(
-    int userId,
-    CreateOrderDto dto)
+ public async Task<OrderDto> CheckoutAsync(int userId, CreateOrderDto dto)
 {
     var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
 
     if (cart is null || cart.Items.Count == 0)
         throw new BadRequestException("Your cart is empty.");
 
-    var address =
-        await _unitOfWork.UserAddresses
-            .GetByIdAndUserIdAsync(
-                dto.UserAddressId,
-                userId);
+    var address = await _unitOfWork.UserAddresses.GetByIdAndUserIdAsync(dto.UserAddressId, userId);
 
     if (address is null)
         throw new NotFoundException("Address not found.");
 
+    var utcNow = DateTime.UtcNow;
+
     decimal subtotal = 0;
 
+    var unitPrices = new Dictionary<CartItem, decimal>();
+
+    // Validate stock and calculate the subtotal.
     foreach (var item in cart.Items)
     {
-        var availableStock =
-            item.ProductVariant?.StockQuantity
-            ?? item.Product.StockQuantity;
+        var availableStock = item.ProductVariant?.StockQuantity ?? item.Product.StockQuantity;
 
         if (item.Quantity > availableStock)
         {
             var productName = item.Product.ProductName;
 
-            throw new BadRequestException(
-                $"'{productName}' only has {availableStock} left in stock.");
+            throw new BadRequestException($"'{productName}' only has {availableStock} left in stock.");
         }
+        
+        var unitPrice = item.ProductVariant is not null
+            ? SalePricingHelper.GetEffectivePrice(
+                item.ProductVariant.OriginalPrice,
+                item.ProductVariant.SalePrice,
+                item.ProductVariant.SaleStartAt,
+                item.ProductVariant.SaleEndAt,
+                utcNow)
+            : SalePricingHelper.GetEffectivePrice(
+                item.Product.OriginalPrice,
+                item.Product.SalePrice,
+                item.Product.SaleStartAt,
+                item.Product.SaleEndAt,
+                utcNow);
 
-        var unitPrice =
-            item.ProductVariant?.SalePrice
-            ?? item.Product.SalePrice;
+        unitPrices[item] = unitPrice;
 
         subtotal += unitPrice * item.Quantity;
     }
-
+    
     OfferCodeCalculationResult? offerResult = null;
 
     if (!string.IsNullOrWhiteSpace(dto.OfferCode))
     {
-        offerResult =
-            await _offerCodeService.CalculateDiscountAsync(
-                dto.OfferCode,
-                userId,
-                subtotal);
+        offerResult = await _offerCodeService.CalculateDiscountAsync(dto.OfferCode, userId, subtotal);
     }
 
-    var discountAmount =
-        offerResult?.DiscountAmount ?? 0;
+    var discountAmount = offerResult?.DiscountAmount ?? 0;
 
-    var totalAmount =
-        subtotal - discountAmount;
-
+    var totalAmount = subtotal - discountAmount;
+    
     var order = new Order
     {
         UserId = userId,
@@ -109,12 +111,10 @@ public class OrderService : IOrderService
         AddressLine = address.AddressLine,
         PostalCode = address.PostalCode
     };
-
+    
     foreach (var item in cart.Items)
     {
-        var unitPrice =
-            item.ProductVariant?.SalePrice
-            ?? item.Product.SalePrice;
+        var unitPrice = unitPrices[item];
 
         order.Items.Add(new OrderItem
         {
@@ -139,7 +139,7 @@ public class OrderService : IOrderService
             item.Product.SoldQuantity += item.Quantity;
         }
     }
-
+    
     if (offerResult is not null)
     {
         order.OfferCodeUsage = new OfferCodeUsage
@@ -151,18 +151,17 @@ public class OrderService : IOrderService
             UsedAt = DateTime.UtcNow
         };
 
-        var offerCode =
-            await _unitOfWork.OfferCodes
-                .GetByIdAsync(offerResult.OfferCodeId);
+        var offerCode = await _unitOfWork.OfferCodes
+            .GetByIdAsync(offerResult.OfferCodeId);
 
         if (offerCode is null)
             throw new NotFoundException("Offer code not found.");
 
         offerCode.UsedCount++;
     }
-
+    
     await _unitOfWork.Orders.AddAsync(order);
-
+    
     foreach (var item in cart.Items.ToList())
         _unitOfWork.CartItems.Delete(item);
 
