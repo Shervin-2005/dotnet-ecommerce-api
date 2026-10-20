@@ -245,6 +245,13 @@ namespace Application.Services
                 IsRead = message.IsRead
             };
         }
+        
+        public async Task<int> DeleteExpiredClosedConversationsAsync(DateTime cutoffDate)
+        {
+            var deletedCount = await _unitOfWork.SupportConversations.DeleteExpiredClosedAsync(cutoffDate);
+
+            return deletedCount;
+        }
 
         private static string GetDisplayName(User user)
         {

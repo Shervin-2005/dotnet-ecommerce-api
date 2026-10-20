@@ -17,5 +17,7 @@ namespace Application.Interfaces
         Task AssignConversationAsync(int conversationId, AssignSupportConversationDto dto);
 
         Task UpdateConversationStatusAsync(int conversationId, UpdateSupportConversationStatusDto dto);
+        
+        Task<int> DeleteExpiredClosedConversationsAsync(DateTime cutoffDate);
     }
 }
