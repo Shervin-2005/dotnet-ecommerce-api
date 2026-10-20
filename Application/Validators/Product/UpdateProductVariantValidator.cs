@@ -3,7 +3,8 @@ using FluentValidation;
 
 namespace Application.Validators.Product;
 
-public class UpdateProductVariantValidator : AbstractValidator<UpdateProductVariantDto>
+public class UpdateProductVariantValidator
+    : AbstractValidator<UpdateProductVariantDto>
 {
     public UpdateProductVariantValidator()
     {
@@ -26,6 +27,27 @@ public class UpdateProductVariantValidator : AbstractValidator<UpdateProductVari
             .LessThanOrEqualTo(x => x.OriginalPrice)
             .When(x => x.SalePrice.HasValue)
             .WithMessage("Sale price cannot be greater than original price.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .NotNull()
+            .When(x =>
+                x.SalePrice.HasValue &&
+                x.SalePrice.Value < x.OriginalPrice)
+            .WithMessage(
+                "Sale duration is required when the sale price is lower than the original price.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .GreaterThan(0)
+            .When(x => x.SaleDurationMinutes.HasValue)
+            .WithMessage("Sale duration must be greater than zero.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .Null()
+            .When(x =>
+                !x.SalePrice.HasValue ||
+                x.SalePrice.Value == x.OriginalPrice)
+            .WithMessage(
+                "Sale duration can only be specified when the sale price is lower than the original price.");
 
         RuleFor(x => x.StockQuantity)
             .GreaterThanOrEqualTo(0)

@@ -5,6 +5,7 @@ public class CreateProductDto
     public string ProductName { get; set; } = null!;
     public decimal OriginalPrice { get; set; }
     public decimal? SalePrice { get; set; }
+    public int? SaleDurationMinutes { get; set; }
     public string Description { get; set; } = null!;
     public int StockQuantity { get; set; }
     public int CategoryId { get; set; }

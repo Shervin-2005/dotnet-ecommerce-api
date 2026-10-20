@@ -16,10 +16,25 @@ public class ProductRequestValidator : AbstractValidator<ProductRequest>
         RuleFor(x => x.OriginalPrice)
             .GreaterThan(0)
             .WithMessage("Price must be greater than 0.");
-        
+
         RuleFor(x => x.SalePrice)
             .GreaterThan(0)
-            .WithMessage("Price must be greater than 0.");
+            .WithMessage("Sale price must be greater than 0.")
+            .LessThanOrEqualTo(x => x.OriginalPrice)
+            .WithMessage("Sale price cannot exceed the original price.")
+            .When(x => x.SalePrice.HasValue);
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .NotNull()
+            .WithMessage("Sale duration is required when the sale price is lower than the original price.")
+            .GreaterThan(0)
+            .WithMessage("Sale duration must be greater than 0.")
+            .When(x => x.SalePrice.HasValue && x.SalePrice.Value < x.OriginalPrice);
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .Null()
+            .WithMessage("Sale duration must not be specified when there is no discount.")
+            .When(x => !x.SalePrice.HasValue || x.SalePrice.Value >= x.OriginalPrice);
 
         RuleFor(x => x.Description)
             .NotEmpty()

@@ -6,6 +6,8 @@
         public string ProductName { get; set; } = null!;
         public decimal OriginalPrice { get; set; }
         public decimal? SalePrice { get; set; }
+        public DateTime? SaleStartAt { get; set; }
+        public DateTime? SaleEndAt { get; set; }
         public string Description { get; set; } = null!;
         public int StockQuantity { get; set; }
         public int SoldQuantity { get; set; }

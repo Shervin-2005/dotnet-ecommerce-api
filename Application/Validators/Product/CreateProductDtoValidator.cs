@@ -15,11 +15,38 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
 
         RuleFor(x => x.OriginalPrice)
             .GreaterThan(0)
-            .WithMessage("Price must be greater than 0.");
-        
+            .WithMessage("Original price must be greater than zero.");
+
         RuleFor(x => x.SalePrice)
             .GreaterThan(0)
-            .WithMessage("Price must be greater than 0.");
+            .When(x => x.SalePrice.HasValue)
+            .WithMessage("Sale price must be greater than zero.");
+
+        RuleFor(x => x.SalePrice)
+            .LessThanOrEqualTo(x => x.OriginalPrice)
+            .When(x => x.SalePrice.HasValue)
+            .WithMessage("Sale price cannot be greater than original price.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .NotNull()
+            .When(x =>
+                x.SalePrice.HasValue &&
+                x.SalePrice.Value < x.OriginalPrice)
+            .WithMessage(
+                "Sale duration is required when the sale price is lower than the original price.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .GreaterThan(0)
+            .When(x => x.SaleDurationMinutes.HasValue)
+            .WithMessage("Sale duration must be greater than zero.");
+
+        RuleFor(x => x.SaleDurationMinutes)
+            .Null()
+            .When(x =>
+                !x.SalePrice.HasValue ||
+                x.SalePrice.Value == x.OriginalPrice)
+            .WithMessage(
+                "Sale duration can only be specified when the sale price is lower than the original price.");
 
         RuleFor(x => x.Description)
             .NotEmpty()
@@ -33,11 +60,11 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
 
         RuleFor(x => x.CategoryId)
             .GreaterThan(0)
-            .WithMessage("Category ID must be greater than 0.");
+            .WithMessage("Category ID must be greater than zero.");
 
         RuleFor(x => x.BrandId)
             .GreaterThan(0)
-            .WithMessage("Brand ID must be greater than 0.");
+            .WithMessage("Brand ID must be greater than zero.");
 
         RuleFor(x => x.Images)
             .NotNull()
