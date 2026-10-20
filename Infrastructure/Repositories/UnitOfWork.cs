@@ -26,6 +26,8 @@ namespace Infrastructure.Repositories
         private IOrderRepository? _orders;
         private IPaymentRepository? _payments;
         private IOfferCodeRepository? _offerCodes;
+        private ISupportConversationRepository _supportConversations;
+        private  ISupportMessageRepository _supportMessages;
         
         public UnitOfWork(AppDbContext context)
         {
@@ -50,7 +52,8 @@ namespace Infrastructure.Repositories
         public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
         public IPaymentRepository Payments => _payments ??= new PaymentRepository(_context);
         public  IOfferCodeRepository OfferCodes => _offerCodes ??= new OfferCodeRepository(_context);
-        
+        public ISupportConversationRepository SupportConversations => _supportConversations ??= new SupportConversationRepository(_context);
+        public ISupportMessageRepository SupportMessages => _supportMessages ??= new SupportMessageRepository(_context);
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
         public void Dispose() => _context.Dispose();
     }

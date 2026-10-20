@@ -30,6 +30,7 @@ namespace Infrastructure.Data.Configurations
 
             builder.Property(u => u.Role)
                 .IsRequired()
+                .HasConversion<string>()
                  .HasDefaultValue(UserRole.Customer);
 
             builder.Property(u => u.IsDeleted)
