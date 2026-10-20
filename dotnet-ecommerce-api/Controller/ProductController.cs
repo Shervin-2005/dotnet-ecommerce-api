@@ -52,6 +52,7 @@ namespace dotnet_ecommerce_api.Controller
                 ProductName = request.ProductName,
                 OriginalPrice = request.OriginalPrice,
                 SalePrice = request.SalePrice,
+                SaleDurationMinutes = request.SaleDurationMinutes,
                 Description = request.Description,
                 StockQuantity = request.StockQuantity,
                 CategoryId = request.CategoryId,
