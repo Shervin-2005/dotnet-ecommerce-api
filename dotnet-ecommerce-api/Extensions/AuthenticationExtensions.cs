@@ -11,38 +11,54 @@ public static class AuthenticationExtensions
     {
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
-        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()
-                          ?? throw new InvalidOperationException("JWT settings are not configured.");
+        var jwtSettings = configuration
+            .GetSection("JwtSettings")
+            .Get<JwtSettings>()
+            ?? throw new InvalidOperationException(
+                "JWT settings are not configured.");
 
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
 
-                    ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                        ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 },
 
-                    ClockSkew = TimeSpan.Zero
-                };
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
 
-                // Read JWT token from cookie
+                        ClockSkew = TimeSpan.Zero
+                    };
+
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        if (context.Request.Cookies.TryGetValue("AccessToken", out var accessToken))
+                        // SignalR may pass the token through
+                        // the query string for WebSockets/SSE.
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var requestPath = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) && requestPath.StartsWithSegments("/hubs/support-chat"))
                         {
                             context.Token = accessToken;
+                            return Task.CompletedTask;
                         }
+
+                        // Normal API requests use the AccessToken cookie.
+                        if (context.Request.Cookies.TryGetValue("AccessToken", out var cookieToken))
+                        {
+                            context.Token = cookieToken;
+                        }
+
                         return Task.CompletedTask;
                     }
                 };
