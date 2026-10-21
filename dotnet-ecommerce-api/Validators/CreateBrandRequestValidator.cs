@@ -3,9 +3,9 @@ using dotnet_ecommerce_api.Models;
 
 namespace dotnet_ecommerce_api.Validators;
 
-public class BrandRequestValidator : AbstractValidator<BrandRequest>
+public class CreateBrandRequestValidator : AbstractValidator<CreateBrandRequest>
 {
-    public BrandRequestValidator()
+    public CreateBrandRequestValidator()
     {
         RuleFor(x => x.BrandName)
             .NotEmpty()

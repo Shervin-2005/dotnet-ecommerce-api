@@ -1,6 +1,6 @@
 ﻿namespace dotnet_ecommerce_api.Models
 {
-    public class BrandRequest
+    public class CreateBrandRequest
     {
         public string BrandName { get; set; } = null!;
         
