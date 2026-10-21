@@ -3,7 +3,7 @@
 public class UpdateCategoryDto
 {
     public string CategoryName { get; set; } = null!;
-    public Stream Image { get; set; } = default!;
-    public string ImageName { get; set; } = null!;
-    public string ContentType { get; set; } = null!;
+    public Stream? Image { get; set; }
+    public string? ImageName { get; set; }
+    public string? ContentType { get; set; }
 }
