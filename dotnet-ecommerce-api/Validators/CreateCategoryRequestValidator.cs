@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace dotnet_ecommerce_api.Validators;
 
-public class CategoryRequestValidator : AbstractValidator<CategoryRequest>
+public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryRequest>
 {
-    public CategoryRequestValidator()
+    public CreateCategoryRequestValidator()
     {
         RuleFor(x => x.CategoryName)
             .NotEmpty()
