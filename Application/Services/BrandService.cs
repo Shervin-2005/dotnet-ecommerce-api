@@ -75,26 +75,34 @@ namespace Application.Services
 
         public async Task<bool> UpdateAsync(int id, UpdateBrandDto dto)
         {
-            string imageUrl = "";
+            string? newImageUrl = null;
+
+            var brand = await _unitOfWork.Brands.GetByIdAsync(id);
+
+            if (brand is null) 
+                return false;
+
+            var oldImageUrl = brand.MainImageUrl;
+            
             try
             {
-                var brand = await _unitOfWork.Brands.GetByIdAsync(id);
-                if (brand is null) return false;
+                brand.BrandName= dto.BrandName;
+                
+                if (dto.Image is not null)
+                {
+                    var extension = Path.GetExtension(dto.ImageName);
+                    var imageName = $"main{extension}";
 
-                var oldImageUrl = brand.MainImageUrl;
+                    newImageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Brands/{brand.ImageFolderId}/images", imageName, dto.ContentType!);
 
-                var extension = Path.GetExtension(dto.ImageName);
-                var imageName = $"main{extension}";
+                    brand.MainImageUrl = newImageUrl;
+                }
 
-                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Brands/{brand.ImageFolderId}/images",
-                                                                      imageName, dto.ContentType);
-                brand.MainImageUrl = imageUrl;
-
-                _mapper.Map(dto, brand);
                 _unitOfWork.Brands.Update(brand);
+
                 await _unitOfWork.SaveChangesAsync();
 
-                if (!string.Equals(oldImageUrl, imageUrl, StringComparison.OrdinalIgnoreCase))
+                if (newImageUrl is not null && !string.IsNullOrEmpty(oldImageUrl) && !string.Equals(oldImageUrl, newImageUrl, StringComparison.OrdinalIgnoreCase))
                 {
                     await _imageStorageService.DeleteAsync(oldImageUrl);
                 }
@@ -103,9 +111,9 @@ namespace Application.Services
             }
             catch
             {
-                if (!string.IsNullOrEmpty(imageUrl))
+                if (newImageUrl is not null)
                 {
-                    await _imageStorageService.DeleteAsync(imageUrl);
+                    await _imageStorageService.DeleteAsync(newImageUrl);
                 }
                 throw;
             }
