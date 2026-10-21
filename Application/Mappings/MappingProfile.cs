@@ -37,6 +37,7 @@ namespace Application.Mappings
 
             //ProductImage
             CreateMap<ProductImage, ProductImageDto>();
+            CreateMap<ProductImage, ProductImageUploadDto>();
             
             //ProductSpecification
             CreateMap<ProductSpecification, ProductSpecificationDto>();
