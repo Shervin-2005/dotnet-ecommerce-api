@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Application.DTOs.Order;
-using Application.Interfaces;
+using Application.Interfaces.Order;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

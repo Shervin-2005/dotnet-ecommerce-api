@@ -1,6 +1,8 @@
 using Application.DTOs.OfferCode;
 using Application.DTOs.Order;
 using Application.Interfaces;
+using Application.Interfaces.OfferCode;
+using Application.Interfaces.Order;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;

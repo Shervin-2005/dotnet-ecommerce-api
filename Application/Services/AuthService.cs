@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Application.Interfaces.UserAndAuth;
 
 namespace Application.Services
 {

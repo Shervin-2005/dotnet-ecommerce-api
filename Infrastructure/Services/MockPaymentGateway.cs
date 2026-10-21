@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.Payment;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;

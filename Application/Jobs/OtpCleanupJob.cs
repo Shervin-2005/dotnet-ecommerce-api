@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.UserAndAuth;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Jobs;

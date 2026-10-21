@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Category;
 using Domain.Entities;
 using Infrastructure.Data;
 

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Brand;
 using Domain.Entities;
 using Infrastructure.Data;
 

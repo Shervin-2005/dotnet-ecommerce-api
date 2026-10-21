@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.Review;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;

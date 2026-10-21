@@ -1,12 +1,11 @@
-﻿using Application.Interfaces;
-using Application.Settings;
-using Domain.Entities;
+﻿using Application.Settings; 
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Application.Interfaces.UserAndAuth;
 
 namespace Infrastructure.Services
 {

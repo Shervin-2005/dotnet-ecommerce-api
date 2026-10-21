@@ -1,4 +1,13 @@
-using Application.Interfaces;
+using Application.Interfaces.Brand;
+using Application.Interfaces.Cart;
+using Application.Interfaces.Category;
+using Application.Interfaces.OfferCode;
+using Application.Interfaces.Order;
+using Application.Interfaces.Payment;
+using Application.Interfaces.Product;
+using Application.Interfaces.Review;
+using Application.Interfaces.SupportChat;
+using Application.Interfaces.UserAndAuth;
 using Application.Jobs;
 using Application.Services;
 using Application.Settings;

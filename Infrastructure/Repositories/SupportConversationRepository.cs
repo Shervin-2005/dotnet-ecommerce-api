@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.SupportChat;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;

@@ -1,5 +1,6 @@
 using Application.DTOs.Review;
 using Application.Interfaces;
+using Application.Interfaces.Review;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;

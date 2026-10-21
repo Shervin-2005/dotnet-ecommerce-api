@@ -1,5 +1,5 @@
 using Application.DTOs.Review;
-using Application.Interfaces;
+using Application.Interfaces.Review;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

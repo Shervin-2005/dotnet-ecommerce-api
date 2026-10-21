@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.Product;
 using Infrastructure.Data;
 using Domain.Entities;
 

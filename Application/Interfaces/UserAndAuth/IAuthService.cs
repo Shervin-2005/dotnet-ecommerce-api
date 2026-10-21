@@ -1,0 +1,22 @@
+﻿using Application.DTOs.UserAndAuth;
+using Domain.Enums;
+
+namespace Application.Interfaces.UserAndAuth
+{
+    public interface IAuthService
+    {
+        Task RequestRegistrationOtpAsync(RequestOtpDto dto);
+        Task<AuthResponseDto> VerifyRegistrationOtpAsync(VerifyRegistrationOtpDto dto);
+        Task RequestLoginOtpAsync(RequestOtpDto dto);
+        Task<AuthResponseDto?> VerifyLoginWithOtpAsync(LoginWithOtpDto dto);
+        Task<AuthResponseDto?> LoginWithPasswordAsync(LoginWithPasswordDto dto);
+        Task RequestPhoneChangeAsync(int userId, RequestPhoneChangeDto dto);
+        Task VerifyPhoneChangeAsync(int userId, VerifyPhoneChangeDto dto);
+        Task RequestAddPasswordOtpAsync(int userId);
+        Task<AddPasswordResult> VerifyAddPasswordAsync(int userId, string otpCode, string newPassword);
+        Task<ChangePasswordResult> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
+        Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto dto);
+        Task<AuthResponseDto> ReissueTokensAsync(int userId);
+        Task LogoutAsync(RefreshTokenDto dto);
+    }
+}

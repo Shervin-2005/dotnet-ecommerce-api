@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Application.DTOs.Cart;
-using Application.Interfaces;
+using Application.Interfaces.Cart;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

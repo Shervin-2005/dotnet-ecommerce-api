@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.Order;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Jobs;
@@ -8,9 +8,7 @@ public class OrderCleanupJob : IOrderCleanupJob
     private readonly IOrderService _orderService;
     private readonly ILogger<OrderCleanupJob> _logger;
 
-    public OrderCleanupJob(
-        IOrderService orderService,
-        ILogger<OrderCleanupJob> logger)
+    public OrderCleanupJob(IOrderService orderService, ILogger<OrderCleanupJob> logger)
     {
         _orderService = orderService;
         _logger = logger;
@@ -18,12 +16,10 @@ public class OrderCleanupJob : IOrderCleanupJob
 
     public async Task CancelExpiredPendingOrdersAsync()
     {
-        _logger.LogInformation(
-            "Starting expired pending orders cleanup.");
+        _logger.LogInformation("Starting expired pending orders cleanup.");
 
         await _orderService.CancelExpiredPendingOrdersAsync();
 
-        _logger.LogInformation(
-            "Expired pending orders cleanup completed.");
+        _logger.LogInformation("Expired pending orders cleanup completed.");
     }
 }

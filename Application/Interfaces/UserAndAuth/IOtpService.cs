@@ -1,0 +1,11 @@
+﻿using Domain.Enums;
+
+namespace Application.Interfaces.UserAndAuth
+{
+    public interface IOtpService
+    {
+        Task IssueOtpAsync(string phoneNumber, OtpPurpose purpose);
+        Task<bool> ConsumeOtpAsync(string phoneNumber, string code);
+        Task DeleteExpiredOtpsAsync();
+    }
+}

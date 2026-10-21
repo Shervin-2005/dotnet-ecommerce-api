@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Brand;
 using Application.Interfaces;
+using Application.Interfaces.Brand;
 using AutoMapper;
 using Domain.Entities;
 

@@ -1,8 +1,8 @@
-﻿using Application.Interfaces;
-using Infrastructure.Settings;
+﻿using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
+using Application.Interfaces.UserAndAuth;
 
 namespace Infrastructure.Services
 {

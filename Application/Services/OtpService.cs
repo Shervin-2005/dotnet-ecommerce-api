@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Enums;
 using System.Security.Cryptography;
 using System.Text;
+using Application.Interfaces.UserAndAuth;
 using Domain.Exceptions;
 
 namespace Application.Services

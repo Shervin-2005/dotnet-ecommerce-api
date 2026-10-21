@@ -1,5 +1,6 @@
 using Application.DTOs.Payment;
 using Application.Interfaces;
+using Application.Interfaces.Payment;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;

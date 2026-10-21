@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Interfaces.SupportChat;
 using Application.Mappings;
 using dotnet_ecommerce_api.Extensions;
 using dotnet_ecommerce_api.Hubs;

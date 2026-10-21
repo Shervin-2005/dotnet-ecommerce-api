@@ -1,12 +1,11 @@
-using Application.Interfaces;
+using Application.Interfaces.OfferCode;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class OfferCodeRepository
-    : GenericRepository<OfferCode>, IOfferCodeRepository
+public class OfferCodeRepository : GenericRepository<OfferCode>, IOfferCodeRepository
 {
     public OfferCodeRepository(AppDbContext context)
         : base(context)

@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Category;
 using Application.Interfaces;
+using Application.Interfaces.Category;
 using AutoMapper;
 using Domain.Entities;
 

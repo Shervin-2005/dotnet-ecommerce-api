@@ -1,5 +1,5 @@
 using Application.DTOs.SupportChat;
-using Application.Interfaces;
+using Application.Interfaces.SupportChat;
 using dotnet_ecommerce_api.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

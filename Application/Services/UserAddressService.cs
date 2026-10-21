@@ -1,5 +1,6 @@
 using Application.DTOs.UserAndAuth;
 using Application.Interfaces;
+using Application.Interfaces.UserAndAuth;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;

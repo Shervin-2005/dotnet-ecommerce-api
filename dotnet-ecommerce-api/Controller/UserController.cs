@@ -1,9 +1,9 @@
 ﻿using Application.DTOs.UserAndAuth;
-using Application.Interfaces;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Application.Interfaces.UserAndAuth;
 using Domain.Exceptions;
 
 namespace dotnet_ecommerce_api.Controller

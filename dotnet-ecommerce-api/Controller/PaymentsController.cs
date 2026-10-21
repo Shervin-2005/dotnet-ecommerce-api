@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Application.DTOs.Payment;
-using Application.Interfaces;
+using Application.Interfaces.Payment;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,5 @@
 using Application.DTOs.Product;
-using Application.Interfaces;
+using Application.Interfaces.Product;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

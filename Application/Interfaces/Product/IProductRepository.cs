@@ -1,0 +1,9 @@
+﻿namespace Application.Interfaces.Product
+{
+    public interface IProductRepository : IGenericRepository<Domain.Entities.Product>
+    {
+        Task<IEnumerable<Domain.Entities.Product>> GetByCategoryAsync(int categoryId);
+        Task<Domain.Entities.Product?> GetWithDetailsAsync(int id);
+        Task<IEnumerable<Domain.Entities.Product>> GetAllWithDetailsAsync();
+    }
+}

@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Product;
 using Application.Interfaces;
+using Application.Interfaces.Product;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;

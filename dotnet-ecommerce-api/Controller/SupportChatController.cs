@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Application.DTOs.SupportChat;
-using Application.Interfaces;
+using Application.Interfaces.SupportChat;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

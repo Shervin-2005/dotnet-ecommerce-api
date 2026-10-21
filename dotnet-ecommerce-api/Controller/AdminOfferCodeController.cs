@@ -1,5 +1,5 @@
 using Application.DTOs.OfferCode;
-using Application.Interfaces;
+using Application.Interfaces.OfferCode;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,5 +1,4 @@
 ﻿using Application.DTOs.UserAndAuth;
-using Application.Interfaces;
 using Application.Settings;
 using Domain.Enums;
 using dotnet_ecommerce_api.Models;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
+using Application.Interfaces.UserAndAuth;
 
 namespace dotnet_ecommerce_api.Controller
 {

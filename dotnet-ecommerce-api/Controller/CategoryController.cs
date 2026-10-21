@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Category;
 using Application.Interfaces;
+using Application.Interfaces.Category;
 using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
