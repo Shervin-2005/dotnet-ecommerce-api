@@ -36,7 +36,7 @@ namespace dotnet_ecommerce_api.Controller
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<BrandDto>> Create([FromForm]BrandRequest request)
+        public async Task<ActionResult<BrandDto>> Create([FromForm]CreateBrandRequest request)
         {
             //later should alter this with fluent validation 
             if (request.File is null || request.File.Length == 0)
@@ -66,33 +66,55 @@ namespace dotnet_ecommerce_api.Controller
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, BrandRequest request)
+        public async Task<IActionResult> Update(int id, UpdateBrandRequest request)
         {
-            //later should alter this with fluent validation 
-            if (request.File is null || request.File.Length == 0)
-                throw new BadRequestException("No file uploaded.");
+            Stream? imageStream = null;
 
-            const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-            if (request.File.Length > maxSizeBytes)
-                throw new BadRequestException("File too large. Max size is 5 MB.");
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(request.File.ContentType))
-                throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
-
-            await using var stream = request.File.OpenReadStream();
-
-            var dto = new UpdateBrandDto
+            try
             {
-                BrandName = request.BrandName,
-                Image = stream,
-                ImageName = request.File.FileName,
-                ContentType = request.File.ContentType
-            };
+                var dto = new UpdateBrandDto
+                {
+                    BrandName = request.BrandName
+                };
 
-            var updated = await _brandService.UpdateAsync(id, dto);
-            if (!updated) throw new NotFoundException("Brand not found.");
-            return NoContent();
+                if (request.File is not null)
+                {
+                    if (request.File.Length == 0)
+                        throw new BadRequestException("Uploaded file is empty.");
+
+                    const long maxSizeBytes = 5 * 1024 * 1024;
+
+                    if (request.File.Length > maxSizeBytes)
+                        throw new BadRequestException("File too large. Max size is 5 MB.");
+
+                    var allowedTypes = new[]
+                    {
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                    };
+
+                    if (!allowedTypes.Contains(request.File.ContentType))
+                        throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
+
+                    imageStream = request.File.OpenReadStream();
+
+                    dto.Image = imageStream;
+                    dto.ImageName = request.File.FileName;
+                    dto.ContentType = request.File.ContentType;
+                }
+
+                var updated = await _brandService.UpdateAsync(id, dto);
+
+                if (!updated) throw new NotFoundException("Brand not found.");
+
+                return NoContent();
+            }
+            finally
+            {
+                if (imageStream is not null)
+                    await imageStream.DisposeAsync();
+            }
         }
 
         [HttpDelete("{id:int}")]
