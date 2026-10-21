@@ -13,24 +13,25 @@ namespace Application.Services
 {
     public class AuthService : IAuthService
     {
-        //later hide DefaultProfileUrl
-        private const string DefaultProfileUrl = "https://s3.ir-thr-at1.arvanstorage.ir/shams1384/shams1384%2FDefault%20Images%2Fprofile.png";
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
         private readonly IOtpService _otpService;
         private readonly JwtSettings _jwtSettings;
+        private readonly IOptions<DefaultImagesOptions> _defaultImages;
 
         public AuthService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, 
                            ITokenService tokenService,
                            IOtpService otpService,
-                           IOptions<JwtSettings> jwtSettings)
+                           IOptions<JwtSettings> jwtSettings,
+                           IOptions<DefaultImagesOptions> defaultImages)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
             _otpService = otpService;
             _jwtSettings = jwtSettings.Value;
+            _defaultImages = defaultImages;
         }
 
         public async Task RequestRegistrationOtpAsync(RequestOtpDto dto)
@@ -56,7 +57,7 @@ namespace Application.Services
             {
                 PhoneNumber = dto.PhoneNumber,
                 Role = UserRole.Customer,
-                ProfileUrl = DefaultProfileUrl,
+                ProfileUrl = _defaultImages.Value.Profile,
             };
 
             var folderId = Guid.NewGuid();
