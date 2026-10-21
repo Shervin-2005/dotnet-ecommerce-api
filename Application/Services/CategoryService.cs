@@ -73,32 +73,36 @@ namespace Application.Services
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
             return category is null ? null : _mapper.Map<CategoryDto>(category);
         }
-
         public async Task<bool> UpdateAsync(int id, UpdateCategoryDto dto)
         {
-            string imageUrl = "";
+            string? newImageUrl = null;
+
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+
+            if (category is null) 
+                return false;
+
+            var oldImageUrl = category.MainImageUrl;
+            
             try
             {
+                category.CategoryName = dto.CategoryName;
+                
+                if (dto.Image is not null)
+                {
+                    var extension = Path.GetExtension(dto.ImageName);
+                    var imageName = $"main{extension}";
 
-                var category = await _unitOfWork.Categories.GetByIdAsync(id);
+                    newImageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Categories/{category.ImageFolderId}/images", imageName, dto.ContentType!);
 
-                if (category is null) return false;
+                    category.MainImageUrl = newImageUrl;
+                }
 
-                var oldImageUrl = category.MainImageUrl;
-
-                var extension = Path.GetExtension(dto.ImageName);
-                var imageName = $"main{extension}";
-
-                imageUrl = await _imageStorageService.UploadAsync(dto.Image, $"Categories/{category.ImageFolderId}/images",
-                                                                      imageName, dto.ContentType);
-
-                category.MainImageUrl = imageUrl;
-
-                _mapper.Map(dto, category);
                 _unitOfWork.Categories.Update(category);
+
                 await _unitOfWork.SaveChangesAsync();
 
-                if (!string.Equals(oldImageUrl, imageUrl, StringComparison.OrdinalIgnoreCase))
+                if (newImageUrl is not null && !string.IsNullOrEmpty(oldImageUrl) && !string.Equals(oldImageUrl, newImageUrl, StringComparison.OrdinalIgnoreCase))
                 {
                     await _imageStorageService.DeleteAsync(oldImageUrl);
                 }
@@ -107,13 +111,12 @@ namespace Application.Services
             }
             catch
             {
-                if (!string.IsNullOrEmpty(imageUrl))
+                if (newImageUrl is not null)
                 {
-                    await _imageStorageService.DeleteAsync(imageUrl);
+                    await _imageStorageService.DeleteAsync(newImageUrl);
                 }
                 throw;
             }
-           
         }
     }
 }
