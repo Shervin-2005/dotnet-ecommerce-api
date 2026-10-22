@@ -6,5 +6,7 @@ namespace Application.Interfaces.UserAndAuth
     {
         Task<User?> GetByPhoneNumberAsync(string phoneNumber);
         Task<IEnumerable<User>> GetAllUsersWithoutFilter();
+        Task<IEnumerable<User>> GetAllDeletedUsersAsync();
+        Task<User?> GetDeletedUserByIdAsync(int userId);
     }
 }

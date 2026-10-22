@@ -16,5 +16,16 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsersWithoutFilter() =>
             await _dbSet.IgnoreQueryFilters().ToListAsync();
+        
+        public async Task<IEnumerable<User>> GetAllDeletedUsersAsync() =>
+            await _dbSet
+                .IgnoreQueryFilters()
+                .Where(u => u.IsDeleted)
+                .ToListAsync();
+        
+        public async Task<User?> GetDeletedUserByIdAsync(int userId) =>
+            await _dbSet
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.IsDeleted);
     }
 }
