@@ -1,10 +1,7 @@
-﻿using Application.DTOs;
-using Application.DTOs.UserAndAuth;
+﻿using Application.DTOs.UserAndAuth;
 using Application.Interfaces;
 using Application.Interfaces.UserAndAuth;
 using AutoMapper;
-using Domain.Entities;
-using Domain.Enums;
 
 namespace Application.Services
 {
@@ -43,6 +40,30 @@ namespace Application.Services
             return true;
         }
 
+        public async Task<IEnumerable<UserDto>> GetAllDeletedUsersAsync()
+        {
+            var users = await _unitOfWork.Users.GetAllDeletedUsersAsync();
+
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+        
+        public async Task<bool> RestoreUserAsync(int userId)
+        {
+            var user = await _unitOfWork.Users.GetDeletedUserByIdAsync(userId);
+
+            if (user is null)
+                return false;
+
+            user.IsDeleted = false;
+            user.DeletedAt = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
+        }
+        
         public async Task<IEnumerable<UserDto>> GetAllActiveUsersAsync()
         {
             var users = await _unitOfWork.Users.GetAllAsync();

@@ -8,6 +8,8 @@ namespace Application.Interfaces.UserAndAuth
         Task<UserDto?> GetByIdAsync(int userId);
         Task<bool> UpdateProfileAsync(int userId, UpdateUserDto dto);
         Task<bool> SoftDeleteAsync(int userId);
+        Task<IEnumerable<UserDto>> GetAllDeletedUsersAsync();
+        Task<bool> RestoreUserAsync(int userId);
         Task<IEnumerable<UserDto>> GetAllActiveUsersAsync();
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
     }
