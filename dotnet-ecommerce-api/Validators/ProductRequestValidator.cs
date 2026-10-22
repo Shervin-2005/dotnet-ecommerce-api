@@ -57,5 +57,10 @@ public class ProductRequestValidator : AbstractValidator<ProductRequest>
         RuleFor(x => x.Images)
             .NotEmpty()
             .WithMessage("At least one product image is required.");
+        
+        RuleForEach(x => x.Images)
+            .Must(ImageFileValidator.IsValid)
+            .WithMessage(
+                "Each image must be a valid JPEG, PNG, or WebP image no larger than 5 MB.");
     }
 }

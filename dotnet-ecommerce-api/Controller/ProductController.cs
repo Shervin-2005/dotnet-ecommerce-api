@@ -33,52 +33,48 @@ namespace dotnet_ecommerce_api.Controller
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductDto>> Create([FromForm]ProductRequest request)
+        public async Task<ActionResult<ProductDto>> Create([FromForm] ProductRequest request)
         {
-            if (request.Images.Count == 0)
-                throw new BadRequestException("At least one image is required");
+            var streams = new List<Stream>();
 
-            const long maxSizeBytes = 5 * 1024 * 1024; //5MB
-
-            var allowedTypes = new[]
+            try
             {
-                "image/jpeg",
-                "image/png",
-                "image/webp"
-            };
-
-            var dto = new CreateProductDto
-            {
-                ProductName = request.ProductName,
-                OriginalPrice = request.OriginalPrice,
-                SalePrice = request.SalePrice,
-                SaleDurationMinutes = request.SaleDurationMinutes,
-                Description = request.Description,
-                StockQuantity = request.StockQuantity,
-                CategoryId = request.CategoryId,
-                BrandId = request.BrandId
-            };
-
-            foreach (var file in request.Images)
-            {
-                if (file.Length == 0)
-                    throw new BadRequestException("One of the images is empty.");
-
-                if (file.Length > maxSizeBytes)
-                    throw new BadRequestException($"'{file.FileName}' exceeds 5 MB.");
-
-                if (!allowedTypes.Contains(file.ContentType))
-                    throw new BadRequestException($"'{file.FileName}' has an unsupported format.");
-
-                dto.Images.Add(new ProductImageUploadDto
+                var dto = new CreateProductDto
                 {
-                    Image = file.OpenReadStream(),
-                    ImageName = file.FileName,
-                    ContentType = file.ContentType
-                });
+                    ProductName = request.ProductName,
+                    OriginalPrice = request.OriginalPrice,
+                    SalePrice = request.SalePrice,
+                    SaleDurationMinutes = request.SaleDurationMinutes,
+                    Description = request.Description,
+                    StockQuantity = request.StockQuantity,
+                    CategoryId = request.CategoryId,
+                    BrandId = request.BrandId
+                };
+
+                foreach (var file in request.Images)
+                {
+                    var stream = file.OpenReadStream();
+                    streams.Add(stream);
+
+                    dto.Images.Add(new ProductImageUploadDto
+                    {
+                        Image = stream,
+                        ImageName = file.FileName,
+                        ContentType = file.ContentType
+                    });
+                }
+
+                var created = await _productService.CreateAsync(dto);
+
+                return CreatedAtAction(nameof(GetById), new { id = created.ProductId }, created);
             }
-            var created = await _productService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.ProductId }, created);
+            finally
+            {
+                foreach (var stream in streams)
+                {
+                    await stream.DisposeAsync();
+                }
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -101,33 +97,23 @@ namespace dotnet_ecommerce_api.Controller
 
         [HttpPost("{id:int}/images")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductImageUploadDto>> AddImage(int id, IFormFile file, [FromForm] bool isMain = false, [FromForm] int displayOrder = 0)
+        public async Task<IActionResult> AddImage(int id, [FromForm] AddProductImageRequest request)
         {
-            //later should alter this with fluent validation 
-            if (file is null || file.Length == 0)
-                return BadRequest("No file uploaded.");
-
-            const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-            if (file.Length > maxSizeBytes)
-                return BadRequest("File too large. Max size is 5 MB.");
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(file.ContentType))
-                return BadRequest("Unsupported file type. Use JPEG, PNG, or WebP.");
-
-            await using var stream = file.OpenReadStream();
+            await using var stream = request.File!.OpenReadStream();
 
             var upload = new ProductImageUploadDto
             {
                 Image = stream,
-                ImageName = file.FileName,
-                ContentType = file.ContentType,
-                IsMain = isMain,
-                DisplayOrder = displayOrder
+                ImageName = request.File.FileName,
+                ContentType = request.File.ContentType,
+                IsMain = request.IsMain,
+                DisplayOrder = request.DisplayOrder
             };
 
             var result = await _productService.AddImageAsync(id, upload);
-            if (result is false) return NotFound();
+
+            if (!result)
+                throw new NotFoundException("Product not found.");
 
             return NoContent();
         }

@@ -33,24 +33,11 @@ namespace dotnet_ecommerce_api.Controller
             
             return Ok(brand);
         }
-
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<BrandDto>> Create([FromForm]CreateBrandRequest request)
+        public async Task<ActionResult<BrandDto>> Create([FromForm] CreateBrandRequest request)
         {
-            //later should alter this with fluent validation 
-            if (request.File is null || request.File.Length == 0)
-                throw new BadRequestException("No file uploaded.");
-
-            const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-            if (request.File.Length > maxSizeBytes)
-                throw new BadRequestException("File too large. Max size is 5 MB.");
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(request.File.ContentType))
-                throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
-
-            await using var stream = request.File.OpenReadStream();
+            await using var stream = request.File!.OpenReadStream();
 
             var dto = new CreateBrandDto
             {
@@ -61,15 +48,16 @@ namespace dotnet_ecommerce_api.Controller
             };
 
             var created = await _brandService.CreateAsync(dto);
+
             return CreatedAtAction(nameof(GetById), new { id = created.BrandId }, created);
         }
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, UpdateBrandRequest request)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateBrandRequest request)
         {
             Stream? imageStream = null;
-
+            
             try
             {
                 var dto = new UpdateBrandDto
@@ -79,24 +67,6 @@ namespace dotnet_ecommerce_api.Controller
 
                 if (request.File is not null)
                 {
-                    if (request.File.Length == 0)
-                        throw new BadRequestException("Uploaded file is empty.");
-
-                    const long maxSizeBytes = 5 * 1024 * 1024;
-
-                    if (request.File.Length > maxSizeBytes)
-                        throw new BadRequestException("File too large. Max size is 5 MB.");
-
-                    var allowedTypes = new[]
-                    {
-                        "image/jpeg",
-                        "image/png",
-                        "image/webp"
-                    };
-
-                    if (!allowedTypes.Contains(request.File.ContentType))
-                        throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
-
                     imageStream = request.File.OpenReadStream();
 
                     dto.Image = imageStream;
@@ -106,7 +76,8 @@ namespace dotnet_ecommerce_api.Controller
 
                 var updated = await _brandService.UpdateAsync(id, dto);
 
-                if (!updated) throw new NotFoundException("Brand not found.");
+                if (!updated)
+                    throw new NotFoundException("Brand not found.");
 
                 return NoContent();
             }
@@ -116,6 +87,7 @@ namespace dotnet_ecommerce_api.Controller
                     await imageStream.DisposeAsync();
             }
         }
+
 
         [HttpDelete("{id:int}")]
         [Authorize(Roles = "Admin")]

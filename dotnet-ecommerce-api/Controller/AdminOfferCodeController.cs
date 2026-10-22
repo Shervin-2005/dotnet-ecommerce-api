@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller;
 
-[ApiController]
-[Route("api/admin/offer-codes")]
 [Authorize(Roles = "Admin")]
-public class AdminOfferCodeController : ControllerBase
+public class AdminOfferCodeController : BaseController
 {
     private readonly IOfferCodeService _offerCodeService;
 

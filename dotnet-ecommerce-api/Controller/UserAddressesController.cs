@@ -7,10 +7,8 @@ using Domain.Exceptions;
 
 namespace dotnet_ecommerce_api.Controller;
 
-[ApiController]
-[Route("api/user-addresses")]
 [Authorize]
-public class UserAddressesController : ControllerBase
+public class UserAddressesController : BaseController
 {
     private readonly IUserAddressService _userAddressService;
 

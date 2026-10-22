@@ -16,5 +16,9 @@ public class UserRequestValidator : AbstractValidator<UserRequest>
             .MaximumLength(100)
             .WithMessage("Last name cannot be longer than 100 characters.")
             .When(x => x.LastName is not null);
+        
+        RuleFor(x => x.File)
+            .Must(file => file is null || ImageFileValidator.IsValid(file))
+            .WithMessage("The image must be a valid JPEG, PNG, or WebP file no larger than 5 MB.");
     }
 }

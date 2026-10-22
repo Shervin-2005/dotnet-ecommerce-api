@@ -6,10 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller;
 
-[ApiController]
-[Route("api/admin/reviews")]
 [Authorize(Roles = "Admin")]
-public class AdminReviewsController : ControllerBase
+public class AdminReviewsController : BaseController
 {
     private readonly IReviewService _reviewService;
 

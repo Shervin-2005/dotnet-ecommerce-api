@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace dotnet_ecommerce_api.Controller
 {
     [Authorize]
-    [Route("api/orders/{orderId:int}/payments")]
     public class PaymentsController : BaseController
     {
         private readonly IPaymentService _paymentService;

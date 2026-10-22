@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller
 {
-    [ApiController]
-    [Route("api/products/{productId:int}/reviews")]
-    public class ReviewsController : ControllerBase
+    public class ReviewsController : BaseController
     {
         private readonly IReviewService _reviewService;
 

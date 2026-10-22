@@ -1,15 +1,14 @@
 using System.Security.Claims;
 using Application.DTOs.SupportChat;
 using Application.Interfaces.SupportChat;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_ecommerce_api.Controller;
 
-[ApiController]
-[Route("api/support-chat")]
 [Authorize]
-public class SupportChatController : ControllerBase
+public class SupportChatController : BaseController
 {
     private readonly ISupportChatService _supportChatService;
 
@@ -94,7 +93,7 @@ public class SupportChatController : ControllerBase
         var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (!int.TryParse(userIdValue, out var userId))
-            throw new UnauthorizedAccessException("Invalid authenticated user.");
+            throw new UnauthorizedException("Invalid authenticated user.");
 
         return userId;
     }

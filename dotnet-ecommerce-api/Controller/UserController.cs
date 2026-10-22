@@ -28,25 +28,14 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateMe(UserRequest request)
+        public async Task<IActionResult> UpdateMe([FromForm] UserRequest request)
         {
             Stream? imageStream = null;
 
             try
             {
-                //later should alter this with fluent validation 
-                if (request.File is not null && request.File.Length > 0)
-                {
-                    const long maxSizeBytes = 5 * 1024 * 1024; // 5 MB
-                    if (request.File.Length > maxSizeBytes)
-                        throw new BadRequestException("File too large. Max size is 5 MB.");
-
-                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-                    if (!allowedTypes.Contains(request.File.ContentType))
-                        throw new BadRequestException("Unsupported file type. Use JPEG, PNG, or WebP.");
-
+                if (request.File is not null)
                     imageStream = request.File.OpenReadStream();
-                }
 
                 var dto = new UpdateUserDto
                 {
@@ -58,7 +47,10 @@ namespace dotnet_ecommerce_api.Controller
                 };
 
                 var updated = await _userService.UpdateProfileAsync(GetUserId(), dto);
-                if (!updated) throw new NotFoundException("User not found.");
+
+                if (!updated)
+                    throw new NotFoundException("User not found.");
+
                 return NoContent();
             }
             finally
@@ -104,7 +96,7 @@ namespace dotnet_ecommerce_api.Controller
             var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(value, out var userId))
-                throw new UnauthorizedAccessException("Invalid user identity.");
+                throw new UnauthorizedException("Invalid user identity.");
 
             return userId;
         }

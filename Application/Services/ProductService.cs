@@ -259,12 +259,6 @@ namespace Application.Services
         {
             var product = await _unitOfWork.Products.GetWithDetailsAsync(productId);
             if (product is null) return false;
-
-            if (specs.Count > 30)
-                throw new BadRequestException("A product can have a maximum of 30 specifications.");
-
-            if (specs.Count(x => x.IsMain) > 10)
-                throw new BadRequestException("A product can have a maximum of 10 main specifications.");
             
             foreach (var existing in product.Specifications.ToList())
                 _unitOfWork.ProductSpecifications.Delete(existing);
