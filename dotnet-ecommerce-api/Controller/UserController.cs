@@ -74,7 +74,30 @@ namespace dotnet_ecommerce_api.Controller
             
             return NoContent();
         }
+        [HttpGet("deleted")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllDeletedUsers()
+        {
+            var users = await _userService.GetAllDeletedUsersAsync();
+            return Ok(users);
+        }
 
+        [HttpPost("{id:int}/restore")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RestoreUser(int id)
+        {
+            var restored = await _userService.RestoreUserAsync(id);
+
+            if (!restored)
+                throw new NotFoundException("Deleted user not found.");
+
+            _logger.LogInformation(
+                "User restored. AdminUserId {AdminUserId}, TargetUserId {TargetUserId}",
+                GetUserId(),
+                id);
+
+            return NoContent();
+        }
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllActiveUsers()
