@@ -476,8 +476,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
 
                     b.Property<Guid>("ImageFolderId")
                         .HasColumnType("uuid");

@@ -51,8 +51,8 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
         RuleFor(x => x.Description)
             .NotEmpty()
             .WithMessage("Description is required.")
-            .MaximumLength(2000)
-            .WithMessage("Description cannot be longer than 2000 characters.");
+            .MaximumLength(5000)
+            .WithMessage("Description cannot be longer than 5000 characters.");
 
         RuleFor(x => x.StockQuantity)
             .GreaterThanOrEqualTo(0)
