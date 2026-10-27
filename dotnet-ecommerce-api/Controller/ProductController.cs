@@ -154,5 +154,13 @@ namespace dotnet_ecommerce_api.Controller
 
             return NoContent();
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> Search([FromQuery] ProductSearchRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _productService.SearchAsync(request, cancellationToken);
+
+            return Ok(result);
+        }
     }
 }
