@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Product;
+﻿using Application.DTOs.Common;
+using Application.DTOs.Product;
 using Application.Interfaces;
 using Application.Interfaces.Product;
 using AutoMapper;
@@ -316,6 +317,33 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return true;
+        }
+        public async Task<PagedResult<ProductDto>> SearchAsync(ProductSearchRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _unitOfWork.Products.SearchAsync(request, cancellationToken);
+            
+            var productDtos = _mapper.Map<List<ProductDto>>(result.Items);
+            
+            var ratingSummaries =
+                await _unitOfWork.Reviews.GetRatingSummariesAsync(result.Items.Select(p => p.ProductId));
+            
+            foreach (var productDto in productDtos)
+            {
+                if (ratingSummaries.TryGetValue(productDto.ProductId, out var summary))
+                {
+                    productDto.AverageRating = Math.Round(summary.AverageRating, 1);
+
+                }                    productDto.ReviewCount = summary.Count;
+
+            }
+            
+            return new PagedResult<ProductDto>
+            {
+                Items = productDtos,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
     }
 }

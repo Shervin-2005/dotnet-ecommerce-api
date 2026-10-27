@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Product;
+﻿using Application.DTOs.Common;
+using Application.DTOs.Product;
 
 namespace Application.Interfaces.Product
 {
@@ -14,5 +15,6 @@ namespace Application.Interfaces.Product
         Task<bool> SetMainImageAsync(int productId, int imageId);
         Task<bool> SetSpecificationsAsync(int productId, List<UpsertProductSpecificationDto> specs);
         Task<bool> SetAttributesAsync(int productId, SetProductAttributesDto dto);
+        Task<PagedResult<ProductDto>> SearchAsync(ProductSearchRequest request, CancellationToken cancellationToken = default);
     }
 }
