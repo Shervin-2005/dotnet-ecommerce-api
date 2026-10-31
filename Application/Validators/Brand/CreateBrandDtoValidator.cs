@@ -26,5 +26,9 @@ public class CreateBrandDtoValidator : AbstractValidator<CreateBrandDto>
         RuleFor(x => x.ContentType)
             .NotEmpty()
             .WithMessage("Image content type is required.");
+        
+        RuleFor(x => x.BrandGroupId)
+            .GreaterThan(0)
+            .WithMessage("A valid brand group must be selected.");  
     }
 }

@@ -12,7 +12,12 @@ public class UpdateBrandDtoValidator : AbstractValidator<UpdateBrandDto>
             .WithMessage("Brand name is required.")
             .MaximumLength(100)
             .WithMessage("Brand name cannot be longer than 100 characters.");
-
+        
+        RuleFor(x => x.BrandGroupId)
+            .GreaterThan(0)
+            .When(x => x.BrandGroupId.HasValue)
+            .WithMessage("Brand group ID must be greater than zero."); 
+        
         RuleFor(x => x.Image)
             .NotNull()
             .WithMessage("Brand image is required.");

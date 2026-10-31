@@ -13,6 +13,10 @@ public class CreateBrandRequestValidator : AbstractValidator<CreateBrandRequest>
             .MaximumLength(100)
             .WithMessage("Brand name cannot be longer than 100 characters.");
 
+        RuleFor(x => x.BrandGroupId)
+            .GreaterThan(0)
+            .WithMessage("A valid brand group must be selected.");  
+        
         RuleFor(x => x.File)
             .NotNull()
             .WithMessage("Brand image is required.")

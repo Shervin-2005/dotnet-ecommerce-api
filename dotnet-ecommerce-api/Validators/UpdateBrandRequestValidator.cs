@@ -12,6 +12,11 @@ public class UpdateBrandRequestValidator : AbstractValidator<UpdateBrandRequest>
             .WithMessage("Brand name is required.")
             .MaximumLength(100)
             .WithMessage("Brand name cannot be longer than 100 characters.");
+        
+        RuleFor(x => x.BrandGroupId)
+            .GreaterThan(0)
+            .When(x => x.BrandGroupId.HasValue)
+            .WithMessage("Brand group ID must be greater than zero."); 
 
         When(x => x.File is not null, () =>
         {
