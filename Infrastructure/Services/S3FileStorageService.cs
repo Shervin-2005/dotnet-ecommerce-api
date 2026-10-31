@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 

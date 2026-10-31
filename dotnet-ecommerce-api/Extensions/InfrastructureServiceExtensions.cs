@@ -1,6 +1,7 @@
 using Amazon.Runtime;
 using Amazon.S3;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Application.Interfaces.Payment;
 using Application.Interfaces.UserAndAuth;
 using Infrastructure.Services;

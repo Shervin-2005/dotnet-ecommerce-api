@@ -1,6 +1,7 @@
 using Application.DTOs.Cart;
 using Application.Interfaces;
 using Application.Interfaces.Cart;
+using Application.Interfaces.Common;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;

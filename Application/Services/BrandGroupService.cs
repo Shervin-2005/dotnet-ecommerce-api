@@ -4,6 +4,7 @@ using Application.Interfaces.Brand;
 using AutoMapper;
 using Domain.Entities;
 using System.Text.RegularExpressions;
+using Application.Interfaces.Common;
 
 namespace Application.Services;
 

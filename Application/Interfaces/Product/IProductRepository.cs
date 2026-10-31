@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Common;
 using Application.DTOs.Product;
+using Application.Interfaces.Common;
 
 namespace Application.Interfaces.Product
 {

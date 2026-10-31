@@ -1,5 +1,6 @@
 using Application.DTOs.SupportChat;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Application.Interfaces.SupportChat;
 using Domain.Entities;
 using Domain.Enums;

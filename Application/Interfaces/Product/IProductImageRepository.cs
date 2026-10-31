@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces.Common;
+using Domain.Entities;
 
 namespace Application.Interfaces.Product
 {

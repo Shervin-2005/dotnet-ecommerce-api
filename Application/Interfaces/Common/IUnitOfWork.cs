@@ -9,7 +9,7 @@ using Application.Interfaces.Review;
 using Application.Interfaces.SupportChat;
 using Application.Interfaces.UserAndAuth;
 
-namespace Application.Interfaces
+namespace Application.Interfaces.Common
 {
     public interface IUnitOfWork : IDisposable
     {

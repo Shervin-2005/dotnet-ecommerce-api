@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Brand;
 using Application.Interfaces;
 using Application.Interfaces.Brand;
+using Application.Interfaces.Common;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;

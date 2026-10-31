@@ -1,5 +1,6 @@
 using Application.DTOs.OfferCode;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Application.Interfaces.OfferCode;
 using AutoMapper;
 using Domain.Entities;

@@ -1,3 +1,5 @@
+using Application.Interfaces.Common;
+
 namespace Application.Interfaces.Cart;
 
 public interface ICartRepository : IGenericRepository<Domain.Entities.Cart>

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;

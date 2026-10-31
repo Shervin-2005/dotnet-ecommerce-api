@@ -1,3 +1,4 @@
+using Application.Interfaces.Common;
 using Domain.Entities;
 
 namespace Application.Interfaces.Order;

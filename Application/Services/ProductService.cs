@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Common;
 using Application.DTOs.Product;
 using Application.Interfaces;
+using Application.Interfaces.Common;
 using Application.Interfaces.Product;
 using AutoMapper;
 using Domain.Entities;
