@@ -162,5 +162,19 @@ namespace dotnet_ecommerce_api.Controller
 
             return Ok(result);
         }
+        
+        [HttpGet("{productId:int}")]
+        public async Task<IActionResult> GetSimilarProducts([FromRoute] int productId, [FromQuery] int count = 8, CancellationToken cancellationToken = default)
+        {
+            var request = new GetSimilarProductsRequest
+            {
+                ProductId = productId,
+                Count = count
+            };
+
+            var products = await _productService.GetSimilarProductsAsync(request.ProductId, request.Count, cancellationToken);
+
+            return Ok(products);
+        }
     }
 }
