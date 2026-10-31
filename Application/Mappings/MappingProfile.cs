@@ -46,6 +46,10 @@ namespace Application.Mappings
             CreateMap<Brand, BrandDto>();
             CreateMap<CreateBrandDto, Brand>();
             CreateMap<UpdateBrandDto, Brand>();
+            
+            //BrandGroup
+            CreateMap<BrandGroup, BrandGroupDto>();
+            CreateMap<CreateBrandGroupDto, BrandGroup>();
 
             // Category
             CreateMap<Category, CategoryDto>();
