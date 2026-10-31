@@ -30,6 +30,9 @@ namespace Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BrandId"));
 
+                    b.Property<int>("BrandGroupId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("BrandName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -46,7 +49,38 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("BrandId");
 
+                    b.HasIndex("BrandGroupId");
+
                     b.ToTable("Brands");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BrandGroup", b =>
+                {
+                    b.Property<int>("BrandGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BrandGroupId"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("BrandGroupId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("BrandGroup");
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
@@ -973,6 +1007,17 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProductVariantAttributeValue");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Brand", b =>
+                {
+                    b.HasOne("Domain.Entities.BrandGroup", "BrandGroup")
+                        .WithMany("Brands")
+                        .HasForeignKey("BrandGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BrandGroup");
+                });
+
             modelBuilder.Entity("Domain.Entities.Cart", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -1255,6 +1300,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BrandGroup", b =>
+                {
+                    b.Navigation("Brands");
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
