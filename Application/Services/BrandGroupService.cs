@@ -5,6 +5,7 @@ using AutoMapper;
 using Domain.Entities;
 using System.Text.RegularExpressions;
 using Application.Interfaces.Common;
+using Domain.Exceptions;
 
 namespace Application.Services;
 
@@ -71,7 +72,7 @@ public class BrandGroupService : IBrandGroupService
             return false;
 
         if (group.Brands.Any())
-            throw new InvalidOperationException("Cannot delete a brand group that contains brands.");
+            throw new ConflictException("Cannot delete a brand group that contains brands.");
 
         _unitOfWork.BrandGroups.Delete(group);
 
