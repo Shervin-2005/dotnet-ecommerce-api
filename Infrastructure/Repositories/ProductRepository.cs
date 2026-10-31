@@ -179,16 +179,104 @@ namespace Infrastructure.Repositories
     var orderedProducts = products
         .OrderBy(p => positions[p.ProductId])
         .ToList();
-
-    return new PagedResult<Product>
+    
+    return new PagedResult<Product> 
     {
         Items = orderedProducts,
         Page = request.Page,
         PageSize = request.PageSize,
-        TotalCount = totalCount
-    }; 
+        TotalCount = totalCount 
+    };
+    
         }
         
+        public async Task<IReadOnlyList<Product>> GetSimilarProductsAsync(int productId, int count = 8, CancellationToken cancellationToken = default) 
+        { 
+            count = Math.Clamp(count, 1, 20);
+            
+            var sourceProduct = await _context.Products
+                .AsNoTracking()
+                .Where(p => p.ProductId == productId)
+                .Select(p => new 
+                { 
+                    p.ProductId, 
+                    p.CategoryId, 
+                    p.BrandId, 
+                    p.ProductName 
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (sourceProduct == null) 
+                return Array.Empty<Product>();
+            
+            var sourceSpecificationCount = await _context.ProductSpecifications.CountAsync(s => s.ProductId == productId, cancellationToken);
+            
+            var escapedName = EscapeLikePattern(sourceProduct.ProductName.Trim()); 
+            var namePattern = $"%{escapedName}%";
+            
+            var candidates = _context.Products
+                .AsNoTracking()
+                .Where(p => p.ProductId != productId)
+                .Select(p => new 
+                { 
+                    Product = p,
+                    
+                    MatchingSpecificationCount = 
+                        _context.ProductSpecifications.Count(candidateSpec => 
+                            candidateSpec.ProductId == p.ProductId &&
+                            _context.ProductSpecifications.Any(sourceSpec => 
+                                sourceSpec.ProductId == productId && 
+                                sourceSpec.Key == candidateSpec.Key && 
+                                sourceSpec.Value == candidateSpec.Value)) 
+                });
+            
+    var scoredProducts = candidates.Select(x => new
+    {
+        x.Product,
+        Score = (x.Product.CategoryId == sourceProduct.CategoryId ? 40 : 0) + 
+                (x.Product.BrandId == sourceProduct.BrandId ? 25 : 0) + 
+                //Later we should alter this with pg_trgm 
+                (EF.Functions.ILike(x.Product.ProductName, namePattern, "\\") ? 20 : 0) 
+                +
+                (sourceSpecificationCount == 0 ? 0
+                    : x.MatchingSpecificationCount >= sourceSpecificationCount ? 15
+                    : x.MatchingSpecificationCount * 15 / sourceSpecificationCount)
+    });
+
+    var productIds = await scoredProducts
+        .Where(x => x.Score > 0)
+        .OrderByDescending(x => x.Score)
+        .ThenBy(x => x.Product.ProductId)
+        .Take(count)
+        .Select(x => x.Product.ProductId)
+        .ToListAsync(cancellationToken);
+
+    if (productIds.Count == 0)
+        return Array.Empty<Product>();
+
+    var products = await _context.Products
+        .AsNoTracking()
+        .AsSplitQuery()
+        .Where(p => productIds.Contains(p.ProductId))
+        .Include(p => p.Category)
+        .Include(p => p.Brand)
+        .Include(p => p.Images)
+        .Include(p => p.Specifications)
+        .Include(p => p.Attributes)
+            .ThenInclude(a => a.Values)
+        .Include(p => p.Variants)
+            .ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductAttribute)
+        .ToListAsync(cancellationToken);
+
+    var positions = productIds
+        .Select((id, index) => new { id, index })
+        .ToDictionary(x => x.id, x => x.index);
+
+    return products
+        .OrderBy(p => positions[p.ProductId])
+        .ToList();
+}
         private static string EscapeLikePattern(string value) 
         { 
             return value
