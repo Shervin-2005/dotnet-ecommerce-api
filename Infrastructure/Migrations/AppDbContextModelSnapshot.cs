@@ -674,7 +674,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductSpecification");
+                    b.ToTable("ProductSpecifications");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
