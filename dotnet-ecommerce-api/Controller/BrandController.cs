@@ -42,6 +42,7 @@ namespace dotnet_ecommerce_api.Controller
             var dto = new CreateBrandDto
             {
                 BrandName = request.BrandName,
+                BrandGroupId =  request.BrandGroupId,
                 Image = stream,
                 ImageName = request.File.FileName,
                 ContentType = request.File.ContentType
@@ -62,7 +63,8 @@ namespace dotnet_ecommerce_api.Controller
             {
                 var dto = new UpdateBrandDto
                 {
-                    BrandName = request.BrandName
+                    BrandName = request.BrandName,
+                    BrandGroupId = request.BrandGroupId
                 };
 
                 if (request.File is not null)
