@@ -21,6 +21,12 @@ namespace Infrastructure.Data.Configurations
             builder.Property(b => b.ImageFolderId)
                .IsRequired()
                .HasMaxLength(500);
+            
+            builder.HasOne(b => b.BrandGroup)
+                .WithMany(bg => bg.Brands)
+                .HasForeignKey(b => b.BrandGroupId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
         } 
     }
 }
