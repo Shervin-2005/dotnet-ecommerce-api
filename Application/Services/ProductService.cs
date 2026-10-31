@@ -332,8 +332,8 @@ namespace Application.Services
                 if (ratingSummaries.TryGetValue(productDto.ProductId, out var summary))
                 {
                     productDto.AverageRating = Math.Round(summary.AverageRating, 1);
-
-                }                    productDto.ReviewCount = summary.Count;
+                }                   
+                productDto.ReviewCount = summary.Count;
 
             }
             
@@ -344,6 +344,12 @@ namespace Application.Services
                 PageSize = result.PageSize,
                 TotalCount = result.TotalCount
             };
+        }
+        public async Task<IReadOnlyList<ProductDto>> GetSimilarProductsAsync(int productId, int count = 8, CancellationToken cancellationToken = default)
+        {
+            var products = await _unitOfWork.Products.GetSimilarProductsAsync(productId, count, cancellationToken);
+
+            return _mapper.Map<List<ProductDto>>(products);
         }
     }
 }

@@ -16,5 +16,6 @@ namespace Application.Interfaces.Product
         Task<bool> SetSpecificationsAsync(int productId, List<UpsertProductSpecificationDto> specs);
         Task<bool> SetAttributesAsync(int productId, SetProductAttributesDto dto);
         Task<PagedResult<ProductDto>> SearchAsync(ProductSearchRequest request, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<ProductDto>> GetSimilarProductsAsync(int productId, int count = 8, CancellationToken cancellationToken = default);
     }
 }
