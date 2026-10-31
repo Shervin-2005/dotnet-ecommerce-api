@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Interfaces.Brand;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -24,6 +25,11 @@ namespace Application.Services
             string imageUrl = "";
             try
             {
+                var brandGroup = await _unitOfWork.BrandGroups.GetByIdAsync(dto.BrandGroupId);
+
+                if (brandGroup is null)
+                    throw new NotFoundException("Brand group not found.");
+                
                 var brand = _mapper.Map<Brand>(dto);
 
                 var extension = Path.GetExtension(dto.ImageName);
@@ -82,6 +88,16 @@ namespace Application.Services
 
             if (brand is null) 
                 return false;
+            
+            if (dto.BrandGroupId.HasValue)
+            {
+                var brandGroup = await _unitOfWork.BrandGroups.GetByIdAsync(dto.BrandGroupId.Value);
+
+                if (brandGroup is null)
+                    throw new NotFoundException("Brand group not found.");
+
+                brand.BrandGroupId = dto.BrandGroupId.Value;
+            }
 
             var oldImageUrl = brand.MainImageUrl;
             
