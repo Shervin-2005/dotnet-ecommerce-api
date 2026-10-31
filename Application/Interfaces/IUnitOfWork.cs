@@ -20,6 +20,7 @@ namespace Application.Interfaces
         IProductAttributeRepository ProductAttributes { get; }
         IProductAttributeValueRepository ProductAttributeValues { get; }
         IBrandRepository Brands { get; }
+        IBrandGroupRepository BrandGroups { get; }
         ICategoryRepository Categories { get; }
         IUserRepository Users {  get; }
         IUserAddressRepository UserAddresses { get; }

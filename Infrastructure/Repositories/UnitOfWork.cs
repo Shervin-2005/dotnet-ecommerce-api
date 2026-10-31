@@ -23,6 +23,7 @@ namespace Infrastructure.Repositories
         private IProductAttributeRepository? _productAttributes;
         private IProductAttributeValueRepository _productAttributeValues;
         private IBrandRepository _brands;
+        private IBrandGroupRepository? _brandGroups;
         private ICategoryRepository _categories;
         private IUserRepository _userRepository;
         private IUserAddressRepository _userAddresses;
@@ -49,6 +50,7 @@ namespace Infrastructure.Repositories
         public IProductAttributeValueRepository ProductAttributeValues => _productAttributeValues ??= new ProductAttributeValueRepository(_context);
         public IProductVariantRepository ProductVariants => _productVariants ??= new ProductVariantRepository(_context);
         public IBrandRepository Brands => _brands ??= new BrandRepository(_context);
+        public IBrandGroupRepository BrandGroups => _brandGroups ??= new BrandGroupRepository(_context);
         public ICategoryRepository Categories =>_categories ??= new CategoryRepository(_context);
         public IUserRepository Users => _userRepository ??= new UserRepository(_context);
         public IUserAddressRepository  UserAddresses => _userAddresses ??= new UserAddressRepository(_context);
