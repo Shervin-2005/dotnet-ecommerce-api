@@ -21,6 +21,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IProductVariantService, ProductVariantService>();
         services.AddScoped<IBrandService, BrandService>();
+        services.AddScoped<IBrandGroupService, BrandGroupService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IOtpService, OtpService>();
