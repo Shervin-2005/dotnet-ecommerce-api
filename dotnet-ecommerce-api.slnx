@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Application.UnitTests/Application.UnitTests.csproj" />
   <Project Path="Application/Application.csproj" Id="6a8b2c51-24e0-41f2-a382-dd190ec26dfb" />
   <Project Path="Domain/Domain.csproj" Id="4d0aeea1-9beb-4fa2-8d43-d2a60e24efb7" />
   <Project Path="dotnet-ecommerce-api/dotnet-ecommerce-api.csproj" />
