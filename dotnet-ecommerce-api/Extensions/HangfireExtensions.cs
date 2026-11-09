@@ -6,9 +6,13 @@ namespace dotnet_ecommerce_api.Extensions;
 
 public static class HangfireExtensions
 {
-    public static IServiceCollection AddHangfireServices(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddHangfireServices(this IServiceCollection services, string connectionString, IWebHostEnvironment environment)
     {
+        if (environment.IsEnvironment("Testing"))
+            return services;
+
         services.AddHangfire(config => config.UsePostgreSqlStorage(connectionString));
+
         services.AddHangfireServer();
 
         return services;
@@ -16,10 +20,14 @@ public static class HangfireExtensions
 
     public static WebApplication UseHangfireJobs(this WebApplication app)
     {
+        if (app.Environment.IsEnvironment("Testing"))
+            return app;
+
         app.UseHangfireDashboard();
 
         using var scope = app.Services.CreateScope();
-        var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+        var recurringJobManager = scope.ServiceProvider
+            .GetRequiredService<IRecurringJobManager>();
 
         recurringJobManager.AddOrUpdate<IOrderCleanupJob>(
             "cancel-expired-pending-orders",
@@ -30,7 +38,7 @@ public static class HangfireExtensions
             "delete-old-otps",
             job => job.DeleteExpiredOtpsAsync(),
             "0 3 * * *");
-        
+
         recurringJobManager.AddOrUpdate<ISupportChatCleanupJob>(
             "delete-expired-support-conversations",
             job => job.DeleteExpiredClosedConversationsAsync(),

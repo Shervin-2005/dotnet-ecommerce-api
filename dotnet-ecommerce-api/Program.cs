@@ -31,7 +31,7 @@ try
         .AddInfrastructureServices(builder.Configuration)
         .AddJwtAuthentication(builder.Configuration)
         .AddSwaggerDocumentation()
-        .AddHangfireServices(connectionString)
+        .AddHangfireServices(connectionString, builder.Environment)
         .AddObservability()
         .AddValidation();
 
@@ -72,6 +72,7 @@ try
     app.MapHub<SupportChatHub>("/hubs/support-chat");
 
     app.Run();
+    
 }
 catch (Exception ex)
 {
@@ -81,3 +82,4 @@ finally
 {
     Log.CloseAndFlush();
 }
+public partial class Program { }
