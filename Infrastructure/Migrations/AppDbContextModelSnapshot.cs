@@ -830,7 +830,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Status", "CreatedAt");
 
-                    b.ToTable("SupportConversation");
+                    b.ToTable("SupportConversations");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupportMessage", b =>
@@ -866,7 +866,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupportConversationId", "SentAt", "SupportMessageId");
 
-                    b.ToTable("SupportMessage");
+                    b.ToTable("SupportMessages");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
