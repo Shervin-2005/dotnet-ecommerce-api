@@ -20,8 +20,8 @@ namespace Infrastructure.Data
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
-        public DbSet<SupportConversation> SupportConversations = null!;
-        public DbSet<SupportMessage> SupportMessages = null!;
+        public DbSet<SupportConversation> SupportConversations { get; set; } = null!;
+        public DbSet<SupportMessage> SupportMessages{ get; set; }  = null!;
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
