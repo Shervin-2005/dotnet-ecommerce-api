@@ -6,4 +6,5 @@ public class UpdateCategoryDto
     public Stream? Image { get; set; }
     public string? ImageName { get; set; }
     public string? ContentType { get; set; }
+    public int? ParentCategoryId { get; set; }
 }

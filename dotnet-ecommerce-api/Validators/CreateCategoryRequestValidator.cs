@@ -19,5 +19,10 @@ public class CreateCategoryRequestValidator : AbstractValidator<CreateCategoryRe
             .Must(ImageFileValidator.IsValid)
             .WithMessage(
                 "Invalid image. Upload a valid JPEG, PNG, or WebP image no larger than 5 MB.");
+        
+        RuleFor(x => x.ParentCategoryId)
+            .GreaterThan(0)
+            .When(x => x.ParentCategoryId.HasValue)
+            .WithMessage("Parent category ID must be greater than zero.");
     }
 }

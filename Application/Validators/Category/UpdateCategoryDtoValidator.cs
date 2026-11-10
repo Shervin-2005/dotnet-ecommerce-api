@@ -13,18 +13,19 @@ public class UpdateCategoryDtoValidator : AbstractValidator<UpdateCategoryDto>
             .MaximumLength(100)
             .WithMessage("Category name cannot be longer than 100 characters.");
 
-        RuleFor(x => x.Image)
-            .NotNull()
-            .WithMessage("Category image is required.");
-
         RuleFor(x => x.ImageName)
             .NotEmpty()
             .WithMessage("Image name is required.")
             .MaximumLength(255)
-            .WithMessage("Image name cannot be longer than 255 characters.");
+            .When(x => x.Image is not null);
 
         RuleFor(x => x.ContentType)
             .NotEmpty()
-            .WithMessage("Image content type is required.");
+            .When(x => x.Image is not null);
+
+        RuleFor(x => x.ParentCategoryId)
+            .GreaterThan(0)
+            .When(x => x.ParentCategoryId.HasValue)
+            .WithMessage("Parent category ID must be greater than zero.");
     }
 }

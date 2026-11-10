@@ -17,5 +17,10 @@ public class CategoryDtoValidator : AbstractValidator<CategoryDto>
             .MaximumLength(500)
             .WithMessage("Main image URL cannot be longer than 500 characters.")
             .When(x => x.MainImageUrl is not null);
+        
+        RuleFor(x => x.ParentCategoryId)
+            .GreaterThan(0)
+            .When(x => x.ParentCategoryId.HasValue)
+            .WithMessage("Parent category ID must be greater than zero.");
     }
 }

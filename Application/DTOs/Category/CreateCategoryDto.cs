@@ -6,4 +6,5 @@ public class CreateCategoryDto
     public Stream Image { get; set; } = default!;
     public string ImageName { get; set; } = null!;
     public string ContentType { get; set; } = null!;
+    public int? ParentCategoryId { get; set; }
 }

@@ -4,4 +4,5 @@ public class CreateCategoryRequest
 {
     public string CategoryName { get; set; } = null!;
     public IFormFile File { get; set; } = null!;
+    public int? ParentCategoryId { get; set; }
 }

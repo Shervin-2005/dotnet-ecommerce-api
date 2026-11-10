@@ -26,5 +26,10 @@ public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
         RuleFor(x => x.ContentType)
             .NotEmpty()
             .WithMessage("Image content type is required.");
+
+        RuleFor(x => x.ParentCategoryId)
+            .GreaterThan(0)
+            .When(x => x.ParentCategoryId.HasValue)
+            .WithMessage("Parent category ID must be greater than zero.");
     }
 }
