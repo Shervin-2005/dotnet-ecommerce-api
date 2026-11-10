@@ -168,7 +168,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("ImageFolderId")
-                        .HasMaxLength(500)
                         .HasColumnType("uuid");
 
                     b.Property<string>("MainImageUrl")
@@ -176,7 +175,12 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int?>("ParentCategoryId")
+                        .HasColumnType("integer");
+
                     b.HasKey("CategoryId");
+
+                    b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
                 });
@@ -1055,6 +1059,16 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Category", b =>
+                {
+                    b.HasOne("Domain.Entities.Category", "ParentCategory")
+                        .WithMany("SubCategories")
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentCategory");
+                });
+
             modelBuilder.Entity("Domain.Entities.OfferCodeUsage", b =>
                 {
                     b.HasOne("Domain.Entities.OfferCode", "OfferCode")
@@ -1315,6 +1329,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("SubCategories");
                 });
 
             modelBuilder.Entity("Domain.Entities.OfferCode", b =>
