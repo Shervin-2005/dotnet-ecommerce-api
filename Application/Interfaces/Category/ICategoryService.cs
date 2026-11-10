@@ -5,6 +5,7 @@ namespace Application.Interfaces.Category
     public interface ICategoryService
     {
         Task<IEnumerable<CategoryDto>> GetAllAsync();
+        Task<IEnumerable<CategoryTreeDto>> GetTreeAsync();
         Task<CategoryDto?> GetByIdAsync(int id);
         Task<CategoryDto> CreateAsync(CreateCategoryDto dto);
         Task<bool> UpdateAsync(int id, UpdateCategoryDto dto);
