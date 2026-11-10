@@ -25,6 +25,13 @@ namespace dotnet_ecommerce_api.Controller
             var categories = await _categoryService.GetAllAsync();
             return Ok(categories);
         }
+        
+        [HttpGet("tree")]
+        public async Task<ActionResult<IEnumerable<CategoryTreeDto>>> GetTree()
+        {
+            var categories = await _categoryService.GetTreeAsync();
+            return Ok(categories);
+        }
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = "Admin")]
@@ -44,6 +51,7 @@ namespace dotnet_ecommerce_api.Controller
             var dto = new CreateCategoryDto
             {
                 CategoryName = request.CategoryName,
+                ParentCategoryId = request.ParentCategoryId,
                 Image = stream,
                 ImageName = request.File.FileName,
                 ContentType = request.File.ContentType
@@ -67,7 +75,8 @@ namespace dotnet_ecommerce_api.Controller
             {
                 var dto = new UpdateCategoryDto
                 {
-                    CategoryName = request.CategoryName
+                    CategoryName = request.CategoryName,
+                    ParentCategoryId = request.ParentCategoryId
                 };
 
                 if (request.File is not null)
