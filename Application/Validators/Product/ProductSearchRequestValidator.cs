@@ -3,8 +3,7 @@ using FluentValidation;
 
 namespace Application.Validators.Product;
 
-public class ProductSearchRequestValidator
-    : AbstractValidator<ProductSearchRequest>
+public class ProductSearchRequestValidator : AbstractValidator<ProductSearchRequest>
 {
     public ProductSearchRequestValidator()
     {
@@ -54,5 +53,20 @@ public class ProductSearchRequestValidator
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 50);
+        
+        RuleFor(x => x.AttributeFilters)
+            .NotNull()
+            .Must(filters => filters.Count <= 10)
+            .WithMessage("You cannot apply more than 10 attribute filters.");
+
+        RuleForEach(x => x.AttributeFilters)
+            .SetValidator(new ProductAttributeFilterRequestValidator());
+
+        RuleFor(x => x.AttributeFilters)
+            .Must(filters => filters == null ||
+                             filters.Select(f => f.AttributeName.Trim())
+                                 .Distinct(StringComparer.OrdinalIgnoreCase)
+                                 .Count() == filters.Count)
+            .WithMessage("Duplicate attribute filters are not allowed.");
     }
 }

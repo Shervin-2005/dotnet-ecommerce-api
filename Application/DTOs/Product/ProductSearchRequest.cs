@@ -12,6 +12,8 @@ public class ProductSearchRequest
 
     public decimal? MaxPrice { get; set; }
     
+    public List<ProductAttributeFilterRequest> AttributeFilters { get; set; } = new();
+    
     public string SortBy { get; set; } = "relevance";
     
     public string SortOrder { get; set; } = "asc";
