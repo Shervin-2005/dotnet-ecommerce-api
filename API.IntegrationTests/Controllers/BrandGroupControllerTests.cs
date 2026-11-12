@@ -8,10 +8,10 @@ namespace API.IntegrationTests.Controllers;
 [Collection("BrandGroup")]
 public class BrandGroupControllerTests : IAsyncLifetime
 {
-    private readonly BrandGroupTestFixture _fixture;
+    private readonly IntegrationTestFixture _fixture;
     private readonly HttpClient _client;
 
-    public BrandGroupControllerTests(BrandGroupTestFixture fixture)
+    public BrandGroupControllerTests(IntegrationTestFixture fixture)
     {
         _fixture = fixture;
         _client = fixture.Factory.CreateClient();
