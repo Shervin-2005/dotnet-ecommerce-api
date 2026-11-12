@@ -19,7 +19,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
         {
             var categories = await _categoryService.GetAllAsync();
@@ -34,7 +33,6 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CategoryDto>> GetById(int id)
         {
             var category = await _categoryService.GetByIdAsync(id);
