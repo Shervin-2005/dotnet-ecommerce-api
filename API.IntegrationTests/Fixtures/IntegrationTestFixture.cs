@@ -4,7 +4,7 @@ using Respawn.Graph;
 
 namespace API.IntegrationTests.Fixtures;
 
-public class BrandGroupTestFixture : IAsyncLifetime
+public class IntegrationTestFixture : IAsyncLifetime
 {
     private readonly PostgreSqlFixture _postgresFixture = new();
 
