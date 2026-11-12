@@ -75,7 +75,30 @@ namespace Infrastructure.Repositories
             if (request.BrandId.HasValue) 
                 query = query.Where(p => p.BrandId == request.BrandId.Value); 
             
+            // Filter by attributes
+            if (request.AttributeFilters.Count > 0)
+            {
+                IQueryable<ProductVariant> matchingVariants = _context.Set<ProductVariant>().AsNoTracking();
 
+                foreach (var filter in request.AttributeFilters)
+                {
+                    var attributeName = filter.AttributeName.Trim();
+
+                    var values = filter.Values
+                        .Select(v => v.Trim())
+                        .Distinct()
+                        .ToList();
+
+                    matchingVariants = matchingVariants.Where(v =>
+                        v.AttributeValues.Any(av =>
+                            av.ProductAttribute.Name == attributeName &&
+                            values.Contains(av.Value)));
+                }
+
+                query = query.Where(p =>
+                    matchingVariants.Any(v => v.ProductId == p.ProductId));
+            }
+            
             //Calculate relevance and effective price in SQL.
             var exactPattern = escapedSearchTerm;
             var startsWithPattern = hasSearch ? $"{escapedSearchTerm}%" : null;
