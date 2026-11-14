@@ -20,6 +20,7 @@ public static class ApplicationServiceExtensions
     {
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IProductVariantService, ProductVariantService>();
+        services.AddScoped<IProductTagService, ProductTagService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<IBrandGroupService, BrandGroupService>();
         services.AddScoped<ICategoryService, CategoryService>();
