@@ -17,7 +17,9 @@ The backend and database are developed by me, while the frontend is developed se
 
 ### Product Management
 - Product, category, and brand management
+- Hierarchical category structure with parent-child relationships
 - Product variants and specifications
+- Product tags and tag-based filtering
 - Product image storage using ArvanCloud Object Storage
 - Product search, filtering, sorting, and pagination
 
@@ -42,6 +44,12 @@ The backend and database are developed by me, while the frontend is developed se
 - Background job processing using Hangfire
 - Automatic cancellation of expired pending orders
 
+### Testing
+- Unit testing with xUnit and Moq
+- Integration testing for API endpoints and database interactions
+- PostgreSQL integration testing using Testcontainers
+- Database cleanup between integration tests using Respawn
+
 ### Logging & Observability
 - Structured logging with Serilog
 - Application monitoring and instrumentation with OpenTelemetry
@@ -60,6 +68,8 @@ The backend and database are developed by me, while the frontend is developed se
 | Background Jobs | Hangfire |
 | Validation | FluentValidation |
 | Object Mapping | AutoMapper |
+| Unit Testing | xUnit, Moq |
+| Integration Testing | xUnit, Testcontainers, Respawn |
 | Logging | Serilog |
 | Observability | OpenTelemetry |
 | Object Storage | ArvanCloud S3 |
@@ -77,6 +87,23 @@ The solution is organized into four main layers:
 - **API:** Exposes RESTful endpoints and handles HTTP requests.
 
 This separation helps keep the business logic independent, maintainable, and easier to test.
+
+## 🧪 Testing
+
+Testing is an important part of the development process.
+
+The project uses two main testing approaches:
+
+**Unit Testing**
+- Tests individual components in isolation.
+- Uses Moq to mock dependencies.
+- Helps verify business logic without relying on external systems.
+
+**Integration Testing**
+- Tests interactions between application components.
+- Uses a real PostgreSQL database through Testcontainers.
+- Uses Respawn to reset database state between tests.
+- Verifies API behavior and database interactions.
 
 ## 📁 Project Structure
 
@@ -137,7 +164,7 @@ dotnet build
 
 This project is actively developed and improved as part of an ongoing team project.
 
-The main focus is on backend development, maintainable architecture, database design, and implementing practical software engineering concepts.
+The main focus is on backend development, maintainable architecture, database design, automated testing, and implementing practical software engineering concepts.
 
 ## 📫 Contact
 
