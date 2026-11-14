@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Category;
+using Application.DTOs.Common;
 using Application.Interfaces.Category;
 using Application.Interfaces.Common;
 using AutoMapper;
@@ -66,10 +67,19 @@ namespace Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetAllAsync()
+        public async Task<PagedResult<CategoryDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
-            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
+            var result = await _unitOfWork.Categories.GetAllPagedAsync(request, cancellationToken);
+
+            var categoryDtos = _mapper.Map<List<CategoryDto>>(result.Items);
+
+            return new PagedResult<CategoryDto>
+            {
+                Items = categoryDtos,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
 
         public async Task<IEnumerable<CategoryTreeDto>> GetTreeAsync()

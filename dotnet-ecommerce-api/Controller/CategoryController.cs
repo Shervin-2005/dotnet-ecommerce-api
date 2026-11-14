@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Category;
+using Application.DTOs.Common;
 using Application.Interfaces;
 using Application.Interfaces.Category;
 using Domain.Exceptions;
@@ -19,9 +20,10 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
+        public async Task<ActionResult<PagedResult<CategoryDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var categories = await _categoryService.GetAllAsync();
+            var categories = await _categoryService.GetAllAsync(request, cancellationToken);
+
             return Ok(categories);
         }
         

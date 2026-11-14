@@ -1,4 +1,5 @@
 using Application.DTOs.Category;
+using Application.DTOs.Common;
 using Application.Interfaces.Category;
 using Application.Interfaces.Common;
 using Application.Services;
@@ -36,9 +37,15 @@ public class CategoryServiceTests
     }
     
     [Fact]
-    public async Task GetAllAsync_WhenCategoriesExist_ReturnsMappedDtos()
+    public async Task GetAllAsync_WhenCategoriesExist_ReturnsPagedMappedDtos()
     {
         // Arrange
+        var request = new PaginationRequest
+        {
+            Page = 1,
+            PageSize = 20
+        };
+
         var categories = new List<Category>
         {
             new()
@@ -71,41 +78,81 @@ public class CategoryServiceTests
             }
         };
 
-        _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(categories);
+        var pagedCategories = new PagedResult<Category>
+        {
+            Items = categories,
+            Page = 1,
+            PageSize = 20,
+            TotalCount = 2
+        };
 
-        _mapperMock.Setup(m => m.Map<IEnumerable<CategoryDto>>(categories)).Returns(expectedDtos);
+        _categoryRepositoryMock
+            .Setup(r => r.GetAllPagedAsync(request, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(pagedCategories);
+
+        _mapperMock.Setup(m => m.Map<List<CategoryDto>>(categories)).Returns(expectedDtos);
 
         // Act
-        var result = await _categoryService.GetAllAsync();
+        var result = await _categoryService.GetAllAsync(request);
 
         // Assert
-        Assert.Equal(2, result.Count());
-        Assert.Equal("Coffee", result.First().CategoryName);
-        Assert.Equal("Tea", result.Last().CategoryName);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal("Coffee", result.Items[0].CategoryName);
+        Assert.Equal("Tea", result.Items[1].CategoryName);
 
-        _categoryRepositoryMock.Verify(r => r.GetAllAsync(), Times.Once);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(20, result.PageSize);
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.TotalPages);
 
-        _mapperMock.Verify(m => m.Map<IEnumerable<CategoryDto>>(categories), Times.Once);
+        _categoryRepositoryMock.Verify(
+            r => r.GetAllPagedAsync(request, It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        _mapperMock.Verify(
+            m => m.Map<List<CategoryDto>>(categories),
+            Times.Once);
     }
     
     [Fact]
-    public async Task GetAllAsync_WhenNoCategoriesExist_ReturnsEmptyCollection()
+    public async Task GetAllAsync_WhenNoCategoriesExist_ReturnsEmptyPagedResult()
     {
         // Arrange
-        var categories = new List<Category>();
-        var expectedDtos = new List<CategoryDto>();
+        var request = new PaginationRequest
+        {
+            Page = 1,
+            PageSize = 20
+        };
 
-        _categoryRepositoryMock.Setup(r => r.GetAllAsync()).ReturnsAsync(categories);
+        var pagedCategories = new PagedResult<Category>
+        {
+            Items = new List<Category>(),
+            Page = 1,
+            PageSize = 20,
+            TotalCount = 0
+        };
 
-        _mapperMock.Setup(m => m.Map<IEnumerable<CategoryDto>>(categories)).Returns(expectedDtos);
+        _categoryRepositoryMock
+            .Setup(r => r.GetAllPagedAsync(request, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(pagedCategories);
+
+        _mapperMock
+            .Setup(m => m.Map<List<CategoryDto>>(pagedCategories.Items))
+            .Returns(new List<CategoryDto>());
 
         // Act
-        var result = await _categoryService.GetAllAsync();
+        var result = await _categoryService.GetAllAsync(request);
 
         // Assert
-        Assert.Empty(result);
+        Assert.Empty(result.Items);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(20, result.PageSize);
+        Assert.Equal(0, result.TotalCount);
+        Assert.Equal(0, result.TotalPages);
 
-        _categoryRepositoryMock.Verify(r => r.GetAllAsync(), Times.Once);
+        _categoryRepositoryMock.Verify(
+            r => r.GetAllPagedAsync(request, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
     
     [Fact]
