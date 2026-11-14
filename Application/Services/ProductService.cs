@@ -100,14 +100,15 @@ namespace Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllAsync()
+        public async Task<PagedResult<ProductDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            var products = await _unitOfWork.Products.GetAllWithDetailsAsync();
-            var productList = products.ToList();
+            var result = await _unitOfWork.Products.GetAllWithDetailsAsync(request, cancellationToken);
 
-            var dtos = _mapper.Map<List<ProductDto>>(productList);
-            
-            var summaries = await _unitOfWork.Reviews.GetRatingSummariesAsync(productList.Select(p => p.ProductId));
+            var dtos = _mapper.Map<List<ProductDto>>(result.Items);
+
+            var summaries = await _unitOfWork.Reviews.GetRatingSummariesAsync(
+                result.Items.Select(p => p.ProductId));
+
             foreach (var dto in dtos)
             {
                 if (summaries.TryGetValue(dto.ProductId, out var summary))
@@ -117,7 +118,13 @@ namespace Application.Services
                 }
             }
 
-            return dtos;
+            return new PagedResult<ProductDto>
+            {
+                Items = dtos,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id)

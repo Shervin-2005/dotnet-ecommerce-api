@@ -30,9 +30,25 @@ namespace Infrastructure.Repositories
                 .Include(p => p.ProductTags)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         
-        public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
+        public async Task<PagedResult<Product>> GetAllWithDetailsAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            return await _context.Products
+            var query = _context.Products.AsNoTracking();
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var skip = (int)Math.Min(((long)request.Page - 1) * request.PageSize, int.MaxValue);
+
+            var pageIds = await query
+                .OrderBy(p => p.ProductId)
+                .Skip(skip)
+                .Take(request.PageSize)
+                .Select(p => p.ProductId)
+                .ToListAsync(cancellationToken);
+
+            var products = await _context.Products
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(p => pageIds.Contains(p.ProductId))
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
@@ -43,8 +59,24 @@ namespace Infrastructure.Repositories
                 .ThenInclude(v => v.AttributeValues)
                 .ThenInclude(av => av.ProductAttribute)
                 .Include(p => p.ProductTags)
-                .ToListAsync();
-        } 
+                .ToListAsync(cancellationToken);
+
+            var positions = pageIds
+                .Select((id, index) => new { id, index })
+                .ToDictionary(x => x.id, x => x.index);
+
+            var orderedProducts = products
+                .OrderBy(p => positions[p.ProductId])
+                .ToList();
+
+            return new PagedResult<Product>
+            {
+                Items = orderedProducts,
+                Page = request.Page,
+                PageSize = request.PageSize,
+                TotalCount = totalCount
+            };
+        }
         
         public async Task<PagedResult<Product>> SearchAsync(ProductSearchRequest request, CancellationToken cancellationToken = default) 
         { 

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Product;
+﻿using Application.DTOs.Common;
+using Application.DTOs.Product;
 using Application.Interfaces.Product;
 using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
@@ -17,9 +18,10 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll()
+        public async Task<ActionResult<PagedResult<ProductDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var products = await _productService.GetAllAsync();
+            var products = await _productService.GetAllAsync(request, cancellationToken);
+
             return Ok(products);
         }
 
@@ -155,7 +157,7 @@ namespace dotnet_ecommerce_api.Controller
             return NoContent();
         }
         
-        [HttpGet]
+        [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] ProductSearchRequest request, CancellationToken cancellationToken)
         {
             var result = await _productService.SearchAsync(request, cancellationToken);
@@ -163,7 +165,7 @@ namespace dotnet_ecommerce_api.Controller
             return Ok(result);
         }
         
-        [HttpGet("{productId:int}")]
+        [HttpGet("{productId:int}/similar")]
         public async Task<IActionResult> GetSimilarProducts([FromRoute] int productId, [FromQuery] int count = 8, CancellationToken cancellationToken = default)
         {
             var request = new GetSimilarProductsRequest
