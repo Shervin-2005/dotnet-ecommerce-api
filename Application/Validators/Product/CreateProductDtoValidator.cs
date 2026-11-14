@@ -69,5 +69,17 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
         RuleFor(x => x.Images)
             .NotNull()
             .WithMessage("Images cannot be null.");
+        
+        RuleFor(x => x.TagIds)
+            .NotNull()
+            .WithMessage("Tag IDs cannot be null.");
+
+        RuleForEach(x => x.TagIds)
+            .GreaterThan(0)
+            .WithMessage("Each tag ID must be greater than zero.");
+
+        RuleFor(x => x.TagIds)
+            .Must(ids => ids.Distinct().Count() == ids.Count)
+            .WithMessage("Duplicate tag IDs are not allowed.");
     }
 }

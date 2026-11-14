@@ -11,4 +11,5 @@ public class ProductRequest
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
     public List<IFormFile> Images { get; set; } = [];
+    public List<int> TagIds { get; set; } = [];
 }

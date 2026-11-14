@@ -65,5 +65,17 @@ public class UpdateProductDtoValidator : AbstractValidator<UpdateProductDto>
         RuleFor(x => x.BrandId)
             .GreaterThan(0)
             .WithMessage("Brand ID must be greater than zero.");
+        
+        RuleFor(x => x.TagIds)
+            .NotNull()
+            .WithMessage("Tag IDs cannot be null.");
+
+        RuleForEach(x => x.TagIds)
+            .GreaterThan(0)
+            .WithMessage("Each tag ID must be greater than zero.");
+
+        RuleFor(x => x.TagIds)
+            .Must(ids => ids.Distinct().Count() == ids.Count)
+            .WithMessage("Duplicate tag IDs are not allowed.");
     }
 }

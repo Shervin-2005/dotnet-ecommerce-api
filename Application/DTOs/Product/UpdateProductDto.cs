@@ -10,4 +10,5 @@ public class UpdateProductDto
     public int StockQuantity { get; set; }
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
+    public List<int> TagIds { get; set; } = [];
 }
