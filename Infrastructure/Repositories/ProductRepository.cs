@@ -27,6 +27,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Variants)
                 .ThenInclude(v => v.AttributeValues)
                 .ThenInclude(av => av.ProductAttribute)
+                .Include(p => p.ProductTags)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         
         public async Task<IEnumerable<Product>> GetAllWithDetailsAsync()
@@ -41,6 +42,7 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Variants)
                 .ThenInclude(v => v.AttributeValues)
                 .ThenInclude(av => av.ProductAttribute)
+                .Include(p => p.ProductTags)
                 .ToListAsync();
         } 
         
@@ -97,6 +99,13 @@ namespace Infrastructure.Repositories
 
                 query = query.Where(p =>
                     matchingVariants.Any(v => v.ProductId == p.ProductId));
+            }
+            
+            //Filter by Tags
+            if (request.TagIds.Count > 0)
+            {
+                query = query.Where(p =>
+                    p.ProductTags.Any(t => request.TagIds.Contains(t.ProductTagId)));
             }
             
             //Calculate relevance and effective price in SQL.
@@ -192,6 +201,7 @@ namespace Infrastructure.Repositories
         .Include(p => p.Variants)
             .ThenInclude(v => v.AttributeValues)
                 .ThenInclude(av => av.ProductAttribute)
+        .Include(p => p.ProductTags)
         .ToListAsync(cancellationToken);
 
     // Preserve the order selected by the database.
@@ -290,6 +300,7 @@ namespace Infrastructure.Repositories
         .Include(p => p.Variants)
             .ThenInclude(v => v.AttributeValues)
                 .ThenInclude(av => av.ProductAttribute)
+        .Include(p => p.ProductTags)
         .ToListAsync(cancellationToken);
 
     var positions = productIds
