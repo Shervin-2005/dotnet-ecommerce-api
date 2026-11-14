@@ -11,6 +11,7 @@ namespace Infrastructure.Data
 
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<ProductSpecification> ProductSpecifications { get; set; } = null!;
+        public DbSet<ProductTag> ProductTags { get; set; }
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<Brand> Brands { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
