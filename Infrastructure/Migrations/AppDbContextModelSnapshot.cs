@@ -715,6 +715,35 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProductSpecifications");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductTag", b =>
+                {
+                    b.Property<int>("ProductTagId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductTagId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("ProductTagId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("ProductTags");
+                });
+
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
                 {
                     b.Property<int>("ProductVariantId")
@@ -994,6 +1023,21 @@ namespace Infrastructure.Migrations
                         .HasFilter("\"IsDefault\" = true");
 
                     b.ToTable("UserAddress");
+                });
+
+            modelBuilder.Entity("ProductTag", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ProductTag");
                 });
 
             modelBuilder.Entity("ProductVariantAttributeValue", b =>
@@ -1294,6 +1338,21 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ProductTag", b =>
+                {
+                    b.HasOne("Domain.Entities.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductTag", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProductVariantAttributeValue", b =>
