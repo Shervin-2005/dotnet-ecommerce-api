@@ -25,8 +25,11 @@ namespace Application.Mappings
 
             CreateMap<CreateProductDto, Product>()
                 .ForMember(dest => dest.Images,
-                 opt => opt.Ignore());
-            CreateMap<UpdateProductDto, Product>();
+                 opt => opt.Ignore())
+                .ForMember(dest => dest.ProductTags, opt => opt.Ignore());
+            
+            CreateMap<UpdateProductDto, Product>()
+                .ForMember(dest => dest.ProductTags, opt => opt.Ignore());
             
             //Product Attribute
             CreateMap<ProductAttribute, ProductAttributeDto>();
@@ -41,6 +44,10 @@ namespace Application.Mappings
             
             //ProductSpecification
             CreateMap<ProductSpecification, ProductSpecificationDto>();
+            
+            //ProductTag
+            CreateMap<ProductTag, ProductTagDto>();
+            CreateMap<CreateProductTagDto, ProductTag>();
 
             // Brand
             CreateMap<Brand, BrandDto>();
