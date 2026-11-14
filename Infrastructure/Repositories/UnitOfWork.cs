@@ -1,5 +1,4 @@
-﻿using Application.Interfaces;
-using Application.Interfaces.Brand;
+﻿using Application.Interfaces.Brand;
 using Application.Interfaces.Cart;
 using Application.Interfaces.Category;
 using Application.Interfaces.Common;
@@ -23,6 +22,7 @@ namespace Infrastructure.Repositories
         private IProductVariantRepository? _productVariants;
         private IProductAttributeRepository? _productAttributes;
         private IProductAttributeValueRepository _productAttributeValues;
+        private IProductTagRepository _productTags;
         private IBrandRepository _brands;
         private IBrandGroupRepository? _brandGroups;
         private ICategoryRepository _categories;
@@ -50,6 +50,7 @@ namespace Infrastructure.Repositories
         public IProductAttributeRepository ProductAttributes => _productAttributes ??= new ProductAttributeRepository(_context);
         public IProductAttributeValueRepository ProductAttributeValues => _productAttributeValues ??= new ProductAttributeValueRepository(_context);
         public IProductVariantRepository ProductVariants => _productVariants ??= new ProductVariantRepository(_context);
+        public IProductTagRepository ProductTags => _productTags ??= new ProductTagRepository(_context);
         public IBrandRepository Brands => _brands ??= new BrandRepository(_context);
         public IBrandGroupRepository BrandGroups => _brandGroups ??= new BrandGroupRepository(_context);
         public ICategoryRepository Categories =>_categories ??= new CategoryRepository(_context);

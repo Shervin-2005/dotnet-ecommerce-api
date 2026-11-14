@@ -19,6 +19,7 @@ namespace Application.Interfaces.Common
         IProductVariantRepository ProductVariants { get; }
         IProductAttributeRepository ProductAttributes { get; }
         IProductAttributeValueRepository ProductAttributeValues { get; }
+        IProductTagRepository ProductTags { get; }
         IBrandRepository Brands { get; }
         IBrandGroupRepository BrandGroups { get; }
         ICategoryRepository Categories { get; }
