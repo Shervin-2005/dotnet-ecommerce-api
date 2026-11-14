@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Brand;
+using Application.DTOs.Common;
 using Application.Interfaces.Brand;
 using Domain.Exceptions;
 using dotnet_ecommerce_api.Models;
@@ -17,9 +18,10 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BrandDto>>> GetAll()
+        public async Task<ActionResult<PagedResult<BrandDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var brands = await _brandService.GetAllAsync();
+            var brands = await _brandService.GetAllAsync(request, cancellationToken);
+
             return Ok(brands);
         }
 

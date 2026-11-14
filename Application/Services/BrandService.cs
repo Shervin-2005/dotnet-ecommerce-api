@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Brand;
+using Application.DTOs.Common;
 using Application.Interfaces;
 using Application.Interfaces.Brand;
 using Application.Interfaces.Common;
@@ -69,10 +70,19 @@ namespace Application.Services
 
         }
 
-        public async Task<IEnumerable<BrandDto>> GetAllAsync()
+        public async Task<PagedResult<BrandDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            var brands = await _unitOfWork.Brands.GetAllAsync();
-            return _mapper.Map<IEnumerable<BrandDto>>(brands);
+            var result = await _unitOfWork.Brands.GetAllPagedAsync(request, cancellationToken);
+
+            var brandDtos = _mapper.Map<List<BrandDto>>(result.Items);
+
+            return new PagedResult<BrandDto>
+            {
+                Items = brandDtos,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
 
         public async Task<BrandDto?> GetByIdAsync(int id)
