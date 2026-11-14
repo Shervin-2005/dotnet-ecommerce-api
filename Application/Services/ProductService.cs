@@ -29,6 +29,8 @@ namespace Application.Services
             try
             {
                 var product = _mapper.Map<Product>(dto);
+                
+                await AssignTagsAsync(product, dto.TagIds);
 
                 var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
 
@@ -141,6 +143,8 @@ namespace Application.Services
             if (product is null) return false;
 
             _mapper.Map(dto, product);
+            
+            await AssignTagsAsync(product, dto.TagIds);
 
             var sale = SalePricingHelper.Configure(dto.OriginalPrice, dto.SalePrice, dto.SaleDurationMinutes);
 
@@ -351,6 +355,21 @@ namespace Application.Services
             var products = await _unitOfWork.Products.GetSimilarProductsAsync(productId, count, cancellationToken);
 
             return _mapper.Map<List<ProductDto>>(products);
+        }
+        
+        private async Task AssignTagsAsync(Product product, List<int> tagIds)
+        {
+            var uniqueTagIds = tagIds.Distinct().ToList();
+
+            var tags = await _unitOfWork.ProductTags.GetByIdsAsync(uniqueTagIds);
+
+            if (tags.Count != uniqueTagIds.Count)
+                throw new NotFoundException("One or more tags were not found.");
+
+            product.ProductTags.Clear();
+
+            foreach (var tag in tags)
+                product.ProductTags.Add(tag);
         }
     }
 }
