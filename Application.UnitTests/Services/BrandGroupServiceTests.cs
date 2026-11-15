@@ -1,4 +1,5 @@
 using Application.DTOs.Brand;
+using Application.DTOs.Common;
 using Application.Interfaces.Brand;
 using Application.Interfaces.Common;
 using Application.Services;
@@ -528,64 +529,144 @@ public class BrandGroupServiceTests
         mapperMock.Verify(m => m.Map<BrandGroupDto>(It.IsAny<BrandGroup>()), Times.Never);
     }
     
-    [Fact]
-    public async Task GetAllWithBrandsAsync_WhenGroupsExist_ReturnsMappedDtos()
-    {
-        // Arrange
-        var groups = new List<BrandGroup>
-        {
-            new()
-            {
-                BrandGroupId = 1,
-                Name = "Coffee",
-                Slug = "coffee",
-                DisplayOrder = 1
-            },
-            new()
-            {
-                BrandGroupId = 2,
-                Name = "Tea",
-                Slug = "tea",
-                DisplayOrder = 2
-            }
-        };
+   [Fact] 
+   public async Task GetAllWithBrandsAsync_WhenGroupsExist_ReturnsPaginatedMappedDtos() 
+   {
+       // Arrange
+       var request = new PaginationRequest 
+       {
+     
+           Page = 1, 
+           PageSize = 20 
+       };
+       
+       var groups = new List<BrandGroup> 
+       { 
+           new() 
+           { 
+               BrandGroupId = 1, 
+               Name = "Coffee", 
+               Slug = "coffee", 
+               DisplayOrder = 1 
+           }, 
+           new() 
+           { 
+               BrandGroupId = 2, 
+               Name = "Tea", 
+               Slug = "tea", 
+               DisplayOrder = 2 
+           } 
+       };
+       
+       var expectedDtos = new List<BrandGroupDto> 
+       { 
+           new() 
+           { 
+               BrandGroupId = 1, 
+               Name = "Coffee", 
+               Slug = "coffee", 
+               DisplayOrder = 1 
+           }, 
+           new() 
+           { 
+               BrandGroupId = 2, 
+               Name = "Tea", 
+               Slug = "tea",
+               DisplayOrder = 2 
+           } 
+       };
+       
+       var pagedGroups = new PagedResult<BrandGroup> 
+       { 
+           Items = groups, 
+           Page = 1, 
+           PageSize = 20, 
+           TotalCount = 2 
+       };
+       
+       var unitOfWorkMock = new Mock<IUnitOfWork>(); 
+       var repositoryMock = new Mock<IBrandGroupRepository>();
+       var mapperMock = new Mock<IMapper>();
+       
+       unitOfWorkMock.Setup(u => u.BrandGroups).Returns(repositoryMock.Object);
+       
+       repositoryMock.Setup(r => r.GetAllWithBrandsAsync(request, It.IsAny<CancellationToken>())).ReturnsAsync(pagedGroups);
+       
+       mapperMock.Setup(m => m.Map<List<BrandGroupDto>>(groups)).Returns(expectedDtos);
+       
+       var service = new BrandGroupService(unitOfWorkMock.Object, mapperMock.Object);
 
-        var expectedDtos = new List<BrandGroupDto>
-        {
-            new()
-            {
-                BrandGroupId = 1,
-                Name = "Coffee",
-                Slug = "coffee",
-                DisplayOrder = 1
-            },
-            new()
-            {
-                BrandGroupId = 2,
-                Name = "Tea",
-                Slug = "tea",
-                DisplayOrder = 2
-            }
-        };
+       // Act
+       var result = await service.GetAllWithBrandsAsync(request);
 
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var repositoryMock = new Mock<IBrandGroupRepository>();
-        var mapperMock = new Mock<IMapper>();
+    // Assert
+    Assert.Equal(2, result.Items.Count); 
+    Assert.Equal("Coffee", result.Items[0].Name);
+    Assert.Equal("Tea", result.Items[1].Name);
+    Assert.Equal(1, result.Page);
+    Assert.Equal(20, result.PageSize);
+    Assert.Equal(2, result.TotalCount);
+    Assert.Equal(1, result.TotalPages);
 
-        unitOfWorkMock.Setup(u => u.BrandGroups) .Returns(repositoryMock.Object);
+    repositoryMock.Verify(r => r.GetAllWithBrandsAsync(request, It.IsAny<CancellationToken>()), Times.Once);
 
-        repositoryMock.Setup(r => r.GetAllWithBrandsAsync()).ReturnsAsync(groups);
+    mapperMock.Verify(m => m.Map<List<BrandGroupDto>>(groups), Times.Once); 
+   } 
+   
+   [Fact]
+   public async Task GetAllWithBrandsAsync_WhenNoGroupsExist_ReturnsEmptyPagedResult()
+   {
+       // Arrange
+       var request = new PaginationRequest
+       {
+           Page = 1,
+           PageSize = 20
+       };
 
-        mapperMock.Setup(m => m.Map<List<BrandGroupDto>>(groups)) .Returns(expectedDtos);
+       var pagedGroups = new PagedResult<BrandGroup>
+       {
+           Items = new List<BrandGroup>(),
+           Page = 1,
+           PageSize = 20,
+           TotalCount = 0
+       };
 
-        var service = new BrandGroupService(unitOfWorkMock.Object, mapperMock.Object);
+       var expectedDtos = new List<BrandGroupDto>();
 
-        // Act
-        var result = await service.GetAllWithBrandsAsync();
+       var unitOfWorkMock = new Mock<IUnitOfWork>();
+       var repositoryMock = new Mock<IBrandGroupRepository>();
+       var mapperMock = new Mock<IMapper>();
 
-        // Assert
-        Assert.Equal(2, result.Count);
-        Assert.Equal("Coffee", result[0].Name);
-        Assert.Equal("Tea", result[1].Name);
-    }
+       unitOfWorkMock
+           .Setup(u => u.BrandGroups)
+           .Returns(repositoryMock.Object);
+
+       repositoryMock
+           .Setup(r => r.GetAllWithBrandsAsync(
+               request, It.IsAny<CancellationToken>()))
+           .ReturnsAsync(pagedGroups);
+
+       mapperMock
+           .Setup(m => m.Map<List<BrandGroupDto>>(pagedGroups.Items))
+           .Returns(expectedDtos);
+
+       var service = new BrandGroupService(
+           unitOfWorkMock.Object,
+           mapperMock.Object);
+
+       // Act
+       var result = await service.GetAllWithBrandsAsync(request);
+
+       // Assert
+       Assert.Empty(result.Items);
+       Assert.Equal(1, result.Page);
+       Assert.Equal(20, result.PageSize);
+       Assert.Equal(0, result.TotalCount);
+       Assert.Equal(0, result.TotalPages);
+
+       repositoryMock.Verify(
+           r => r.GetAllWithBrandsAsync(
+               request, It.IsAny<CancellationToken>()),
+           Times.Once);
+   }
 }

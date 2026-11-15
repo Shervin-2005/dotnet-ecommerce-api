@@ -1,9 +1,9 @@
 using Application.DTOs.Brand;
-using Application.Interfaces;
 using Application.Interfaces.Brand;
 using AutoMapper;
 using Domain.Entities;
 using System.Text.RegularExpressions;
+using Application.DTOs.Common;
 using Application.Interfaces.Common;
 using Domain.Exceptions;
 
@@ -20,11 +20,19 @@ public class BrandGroupService : IBrandGroupService
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<BrandGroupDto>> GetAllWithBrandsAsync()
+    public async Task<PagedResult<BrandGroupDto>> GetAllWithBrandsAsync(PaginationRequest request, CancellationToken cancellationToken = default)
     {
-        var groups = await _unitOfWork.BrandGroups.GetAllWithBrandsAsync();
+        var result = await _unitOfWork.BrandGroups.GetAllWithBrandsAsync(request, cancellationToken);
 
-        return _mapper.Map<List<BrandGroupDto>>(groups);
+        var groups = _mapper.Map<List<BrandGroupDto>>(result.Items);
+
+        return new PagedResult<BrandGroupDto>
+        {
+            Items = groups,
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
     public async Task<BrandGroupDto?> GetByIdAsync(int id)

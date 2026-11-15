@@ -1,4 +1,5 @@
 using Application.DTOs.Brand;
+using Application.DTOs.Common;
 using Application.Interfaces.Brand;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -16,9 +17,10 @@ public class BrandGroupController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<BrandGroupDto>>> GetAll()
+    public async Task<ActionResult<PagedResult<BrandGroupDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
     {
-        var groups = await _brandGroupService.GetAllWithBrandsAsync();
+        var groups = await _brandGroupService.GetAllWithBrandsAsync(request, cancellationToken);
+
         return Ok(groups);
     }
 
