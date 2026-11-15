@@ -3,6 +3,7 @@ using dotnet_ecommerce_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Application.DTOs.Common;
 using Application.Interfaces.UserAndAuth;
 using Domain.Exceptions;
 
@@ -74,11 +75,13 @@ namespace dotnet_ecommerce_api.Controller
             
             return NoContent();
         }
+        
         [HttpGet("deleted")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllDeletedUsers()
+        public async Task<ActionResult<PagedResult<UserDto>>> GetAllDeletedUsers([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var users = await _userService.GetAllDeletedUsersAsync();
+            var users = await _userService.GetAllDeletedUsersAsync(request, cancellationToken);
+
             return Ok(users);
         }
 
@@ -98,19 +101,22 @@ namespace dotnet_ecommerce_api.Controller
 
             return NoContent();
         }
+        
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllActiveUsers()
+        public async Task<ActionResult<PagedResult<UserDto>>> GetAllActiveUsers([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var users = await _userService.GetAllActiveUsersAsync();
+            var users = await _userService.GetAllActiveUsersAsync(request, cancellationToken);
+
             return Ok(users);
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
+        public async Task<ActionResult<PagedResult<UserDto>>> GetAllUsers([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _userService.GetAllUsersAsync(request, cancellationToken);
+
             return Ok(users);
         }
 

@@ -1,5 +1,5 @@
-﻿using Application.DTOs.UserAndAuth;
-using Application.Interfaces;
+﻿using Application.DTOs.Common;
+using Application.DTOs.UserAndAuth;
 using Application.Interfaces.Common;
 using Application.Interfaces.UserAndAuth;
 using AutoMapper;
@@ -41,13 +41,50 @@ namespace Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllDeletedUsersAsync()
+        public async Task<PagedResult<UserDto>> GetAllDeletedUsersAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            var users = await _unitOfWork.Users.GetAllDeletedUsersAsync();
+            var result = await _unitOfWork.Users.GetAllDeletedUsersPagedAsync(request, cancellationToken);
 
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            var users = _mapper.Map<List<UserDto>>(result.Items);
+
+            return new PagedResult<UserDto>
+            {
+                Items = users,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
-        
+
+        public async Task<PagedResult<UserDto>> GetAllActiveUsersAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _unitOfWork.Users.GetAllActiveUsersPagedAsync(request, cancellationToken);
+
+            var users = _mapper.Map<List<UserDto>>(result.Items);
+
+            return new PagedResult<UserDto>
+            {
+                Items = users,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
+        }
+
+        public async Task<PagedResult<UserDto>> GetAllUsersAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _unitOfWork.Users.GetAllUsersPagedAsync(request, cancellationToken);
+
+            var users = _mapper.Map<List<UserDto>>(result.Items);
+
+            return new PagedResult<UserDto>
+            {
+                Items = users,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
+        }
         public async Task<bool> RestoreUserAsync(int userId)
         {
             var user = await _unitOfWork.Users.GetDeletedUserByIdAsync(userId);
@@ -63,18 +100,6 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return true;
-        }
-        
-        public async Task<IEnumerable<UserDto>> GetAllActiveUsersAsync()
-        {
-            var users = await _unitOfWork.Users.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
-        }
-
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
-        {
-            var users = await _unitOfWork.Users.GetAllUsersWithoutFilter();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
         public async Task<bool> UpdateProfileAsync(int userId, UpdateUserDto dto)
