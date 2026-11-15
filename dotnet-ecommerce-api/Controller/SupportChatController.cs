@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Application.DTOs.Common;
 using Application.DTOs.SupportChat;
 using Application.Interfaces.SupportChat;
 using Domain.Exceptions;
@@ -62,9 +63,9 @@ public class SupportChatController : BaseController
     
     [Authorize(Roles = "Admin")]
     [HttpGet("admin/conversations")]
-    public async Task<IActionResult> GetAllConversations()
+    public async Task<ActionResult<PagedResult<SupportConversationDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
     {
-        var conversations = await _supportChatService.GetAllConversationsAsync();
+        var conversations = await _supportChatService.GetAllConversationsAsync(request, cancellationToken);
 
         return Ok(conversations);
     }

@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.Interfaces.SupportChat;
 using Domain.Entities;
 using Domain.Enums;
@@ -29,14 +30,28 @@ namespace Infrastructure.Repositories
                     conversation.SupportConversationId == conversationId);
         }
 
-        public async Task<List<SupportConversation>> GetAllWithUsersAsync()
+        public async Task<PagedResult<SupportConversation>> GetAllWithUsersAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            return await _dbSet
-                .AsNoTracking()
-                .Include(conversation => conversation.User)
-                .Include(conversation => conversation.AssignedAdmin)
-                .OrderByDescending(conversation => conversation.CreatedAt)
-                .ToListAsync();
+            var query = _dbSet.AsNoTracking();
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var conversations = await query
+                .Include(c => c.User)
+                .Include(c => c.AssignedAdmin)
+                .OrderByDescending(c => c.CreatedAt)
+                .ThenByDescending(c => c.SupportConversationId)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<SupportConversation>
+            {
+                Items = conversations,
+                Page = request.Page,
+                PageSize = request.PageSize,
+                TotalCount = totalCount
+            };
         }
         
         public Task<int> DeleteExpiredClosedAsync(DateTime cutoffDate)

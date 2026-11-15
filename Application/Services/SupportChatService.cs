@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.DTOs.SupportChat;
 using Application.Interfaces;
 using Application.Interfaces.Common;
@@ -147,13 +148,19 @@ namespace Application.Services
             return conversation is null ? null : MapConversation(conversation);
         }
         
-        public async Task<List<SupportConversationDto>> GetAllConversationsAsync()
+        public async Task<PagedResult<SupportConversationDto>> GetAllConversationsAsync(PaginationRequest request, CancellationToken cancellationToken = default)
         {
-            var conversations = await _unitOfWork.SupportConversations.GetAllWithUsersAsync();
+            var result = await _unitOfWork.SupportConversations.GetAllWithUsersAsync(request, cancellationToken);
 
-            return conversations
-                .Select(conversation => MapConversation(conversation))
-                .ToList();
+            var conversations = result.Items.Select(conversation => MapConversation(conversation)).ToList();
+
+            return new PagedResult<SupportConversationDto>
+            {
+                Items = conversations,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
         
         public async Task AssignConversationAsync(int conversationId, AssignSupportConversationDto dto)
