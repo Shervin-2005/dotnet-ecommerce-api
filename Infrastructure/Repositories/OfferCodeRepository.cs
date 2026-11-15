@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.Interfaces.OfferCode;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -28,10 +29,25 @@ public class OfferCodeRepository : GenericRepository<OfferCode>, IOfferCodeRepos
             .CountAsync(x => x.UserId == userId);
     }
 
-    public async Task<List<OfferCode>> GetAllAsync()
+    public async Task<PagedResult<OfferCode>> GetAllPagedAsync(PaginationRequest request, CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        var query = _dbSet.AsNoTracking();
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var offerCodes = await query
             .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
+            .ThenByDescending(x => x.OfferCodeId)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<OfferCode>
+        {
+            Items = offerCodes,
+            Page = request.Page,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        };
     }
 }

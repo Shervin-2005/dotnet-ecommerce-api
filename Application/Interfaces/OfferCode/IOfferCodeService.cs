@@ -1,10 +1,11 @@
+using Application.DTOs.Common;
 using Application.DTOs.OfferCode;
 
 namespace Application.Interfaces.OfferCode;
 
 public interface IOfferCodeService
 {
-    Task<List<OfferCodeDto>> GetAllAsync();
+    Task<PagedResult<OfferCodeDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default);    
     Task<OfferCodeDto> GetByIdAsync(int offerCodeId);
     Task<OfferCodeDto> CreateAsync(CreateOfferCodeDto dto);
     Task<OfferCodeDto> UpdateAsync(int offerCodeId, UpdateOfferCodeDto dto);

@@ -1,5 +1,5 @@
+using Application.DTOs.Common;
 using Application.Interfaces.Common;
-using Domain.Entities;
 
 namespace Application.Interfaces.OfferCode;
 
@@ -7,9 +7,7 @@ public interface IOfferCodeRepository : IGenericRepository<Domain.Entities.Offer
 {
     Task<Domain.Entities.OfferCode?> GetByCodeAsync(string code);
 
-    Task<int> GetUserUsageCountAsync(
-        int offerCodeId,
-        int userId);
+    Task<int> GetUserUsageCountAsync(int offerCodeId, int userId);
 
-    Task<List<Domain.Entities.OfferCode>> GetAllAsync();
+    Task<PagedResult<Domain.Entities.OfferCode>> GetAllPagedAsync(PaginationRequest request, CancellationToken cancellationToken = default);
 }

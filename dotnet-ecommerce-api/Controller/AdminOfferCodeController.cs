@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.DTOs.OfferCode;
 using Application.Interfaces.OfferCode;
 using Microsoft.AspNetCore.Authorization;
@@ -16,9 +17,9 @@ public class AdminOfferCodeController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<OfferCodeDto>>> GetAll()
+    public async Task<ActionResult<PagedResult<OfferCodeDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
     {
-        var offerCodes = await _offerCodeService.GetAllAsync();
+        var offerCodes = await _offerCodeService.GetAllAsync(request, cancellationToken);
 
         return Ok(offerCodes);
     }

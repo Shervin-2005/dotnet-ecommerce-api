@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.DTOs.OfferCode;
 using Application.Interfaces;
 using Application.Interfaces.Common;
@@ -22,11 +23,19 @@ public class OfferCodeService : IOfferCodeService
         _logger = logger;
     }
 
-    public async Task<List<OfferCodeDto>> GetAllAsync()
+    public async Task<PagedResult<OfferCodeDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default)
     {
-        var offerCodes = await _unitOfWork.OfferCodes.GetAllAsync();
+        var result = await _unitOfWork.OfferCodes.GetAllPagedAsync(request, cancellationToken);
 
-        return _mapper.Map<List<OfferCodeDto>>(offerCodes);
+        var offerCodes = _mapper.Map<List<OfferCodeDto>>(result.Items);
+
+        return new PagedResult<OfferCodeDto>
+        {
+            Items = offerCodes,
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
     public async Task<OfferCodeDto> GetByIdAsync(int offerCodeId)
