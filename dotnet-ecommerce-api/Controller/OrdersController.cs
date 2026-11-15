@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Application.DTOs.Common;
 using Application.DTOs.Order;
 using Application.Interfaces.Order;
 using Domain.Enums;
@@ -25,17 +26,19 @@ namespace dotnet_ecommerce_api.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDto>>> GetMyOrders()
+        public async Task<ActionResult<PagedResult<OrderDto>>> GetMyOrders([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var orders = await _orderService.GetMyOrdersAsync(GetUserId());
+            var orders = await _orderService.GetMyOrdersAsync(GetUserId(), request, cancellationToken);
+
             return Ok(orders);
         }
 
         [HttpGet("all")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<OrderDto>>> GetAll()
+        public async Task<ActionResult<PagedResult<OrderDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
         {
-            var orders = await _orderService.GetAllOrdersAsync();
+            var orders = await _orderService.GetAllOrdersAsync(request, cancellationToken);
+
             return Ok(orders);
         }
 
@@ -59,6 +62,7 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusDto dto)
         {
             var result = await _orderService.UpdateStatusAsync(id, dto);
+
             return result switch
             {
                 OrderActionResult.Success => NoContent(),
@@ -73,17 +77,18 @@ namespace dotnet_ecommerce_api.Controller
         public async Task<IActionResult> Cancel(int id)
         {
             var result = await _orderService.CancelAsync(id, GetUserId());
+
             return result switch
             {
                 OrderActionResult.Success => NoContent(),
                 OrderActionResult.NotFound => NotFound(),
                 OrderActionResult.Forbidden => Forbid(),
-                OrderActionResult.InvalidStatusTransition => Conflict("This order can no longer be cancelled."),
+                OrderActionResult.InvalidStatusTransition =>
+                    Conflict("This order can no longer be cancelled."),
                 _ => BadRequest()
             };
         }
 
-        private int GetUserId() =>
-            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 }

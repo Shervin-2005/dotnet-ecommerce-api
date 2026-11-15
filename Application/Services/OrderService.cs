@@ -1,6 +1,6 @@
+using Application.DTOs.Common;
 using Application.DTOs.OfferCode;
 using Application.DTOs.Order;
-using Application.Interfaces;
 using Application.Interfaces.Common;
 using Application.Interfaces.OfferCode;
 using Application.Interfaces.Order;
@@ -172,17 +172,32 @@ public class OrderService : IOrderService
 
     return _mapper.Map<OrderDto>(order);
 }
-
-    public async Task<IEnumerable<OrderDto>> GetMyOrdersAsync(int userId)
-    {
-        var orders = await _unitOfWork.Orders.GetByUserIdAsync(userId);
-        return _mapper.Map<IEnumerable<OrderDto>>(orders);
+    public async Task<PagedResult<OrderDto>> GetMyOrdersAsync(int userId, PaginationRequest request, CancellationToken cancellationToken = default) 
+    { 
+        var result = await _unitOfWork.Orders.GetByUserIdPagedWithDetailsAsync(userId, request, cancellationToken);
+        
+        var orderDtos = _mapper.Map<List<OrderDto>>(result.Items);
+        
+        return new PagedResult<OrderDto> 
+        { 
+            Items = orderDtos, 
+            Page = result.Page, 
+            PageSize = result.PageSize, 
+            TotalCount = result.TotalCount 
+        }; 
     }
-
-    public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
-    {
-        var orders = await _unitOfWork.Orders.GetAllWithDetailsAsync();
-        return _mapper.Map<IEnumerable<OrderDto>>(orders);
+    public async Task<PagedResult<OrderDto>> GetAllOrdersAsync(PaginationRequest request, CancellationToken cancellationToken = default) { 
+        var result = await _unitOfWork.Orders.GetAllPagedWithDetailsAsync(request, cancellationToken);
+        
+        var orderDtos = _mapper.Map<List<OrderDto>>(result.Items);
+        
+        return new PagedResult<OrderDto> 
+        { 
+            Items = orderDtos, 
+            Page = result.Page, 
+            PageSize = result.PageSize, 
+            TotalCount = result.TotalCount 
+        }; 
     }
 
     public async Task<(OrderActionResult Result, OrderDto? Order)> GetOrderDetailAsync(int orderId, int userId, bool isAdmin)
