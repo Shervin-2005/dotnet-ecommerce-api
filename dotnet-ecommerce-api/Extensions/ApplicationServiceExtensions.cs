@@ -1,6 +1,7 @@
 using Application.Interfaces.Brand;
 using Application.Interfaces.Cart;
 using Application.Interfaces.Category;
+using Application.Interfaces.FlashSale;
 using Application.Interfaces.OfferCode;
 using Application.Interfaces.Order;
 using Application.Interfaces.Payment;
@@ -37,6 +38,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOfferCodeService, OfferCodeService>();
         services.AddScoped<ISupportChatService, SupportChatService>();
         services.AddScoped<ISupportChatCleanupJob, SupportChatCleanupJob>();
+        services.AddScoped<IFlashSaleService,  FlashSaleService>();
         
         services.AddOptions<DefaultImagesOptions>().BindConfiguration("DefaultImages")
             .Validate(options => Uri.TryCreate(
