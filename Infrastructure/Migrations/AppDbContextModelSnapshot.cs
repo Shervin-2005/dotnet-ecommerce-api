@@ -185,6 +185,69 @@ namespace Infrastructure.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Domain.Entities.FlashSale", b =>
+                {
+                    b.Property<int>("FlashSaleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FlashSaleId"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("FlashSaleId");
+
+                    b.ToTable("FlashSales");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FlashSaleItem", b =>
+                {
+                    b.Property<int>("FlashSaleItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FlashSaleItemId"));
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<int>("FlashSaleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("FlashSaleItemId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("FlashSaleId", "ProductId", "ProductVariantId")
+                        .IsUnique();
+
+                    b.ToTable("FlashSaleItems");
+                });
+
             modelBuilder.Entity("Domain.Entities.OfferCode", b =>
                 {
                     b.Property<int>("OfferCodeId")
@@ -1113,6 +1176,32 @@ namespace Infrastructure.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Domain.Entities.FlashSaleItem", b =>
+                {
+                    b.HasOne("Domain.Entities.FlashSale", "FlashSale")
+                        .WithMany("Items")
+                        .HasForeignKey("FlashSaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("FlashSale");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("Domain.Entities.OfferCodeUsage", b =>
                 {
                     b.HasOne("Domain.Entities.OfferCode", "OfferCode")
@@ -1390,6 +1479,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FlashSale", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Domain.Entities.OfferCode", b =>
