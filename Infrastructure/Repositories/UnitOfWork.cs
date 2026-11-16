@@ -2,6 +2,7 @@
 using Application.Interfaces.Cart;
 using Application.Interfaces.Category;
 using Application.Interfaces.Common;
+using Application.Interfaces.FlashSale;
 using Application.Interfaces.OfferCode;
 using Application.Interfaces.Order;
 using Application.Interfaces.Payment;
@@ -38,6 +39,7 @@ namespace Infrastructure.Repositories
         private IOfferCodeRepository? _offerCodes;
         private ISupportConversationRepository _supportConversations;
         private  ISupportMessageRepository _supportMessages;
+        private IFlashSaleRepository? _flashSales;
         
         public UnitOfWork(AppDbContext context)
         {
@@ -66,6 +68,7 @@ namespace Infrastructure.Repositories
         public  IOfferCodeRepository OfferCodes => _offerCodes ??= new OfferCodeRepository(_context);
         public ISupportConversationRepository SupportConversations => _supportConversations ??= new SupportConversationRepository(_context);
         public ISupportMessageRepository SupportMessages => _supportMessages ??= new SupportMessageRepository(_context);
+        public IFlashSaleRepository FlashSales => _flashSales ??= new FlashSaleRepository(_context);
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
         public void Dispose() => _context.Dispose();
     }
