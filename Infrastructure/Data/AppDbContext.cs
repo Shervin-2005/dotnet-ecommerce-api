@@ -23,6 +23,8 @@ namespace Infrastructure.Data
         public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<SupportConversation> SupportConversations { get; set; } = null!;
         public DbSet<SupportMessage> SupportMessages{ get; set; }  = null!;
+        public DbSet<FlashSale> FlashSales { get; set; } = null!;
+        public DbSet<FlashSaleItem> FlashSaleItems { get; set; } = null!;
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
