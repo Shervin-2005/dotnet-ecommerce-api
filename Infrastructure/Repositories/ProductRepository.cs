@@ -16,6 +16,11 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId) =>
             await _dbSet.Where(p => p.CategoryId == categoryId).ToListAsync();
 
+        public async Task<Product?> GetByIdWithVariantsAsync(int productId, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.Include(p => p.Variants).FirstOrDefaultAsync(p => p.ProductId == productId, cancellationToken);
+        } 
+        
         public async Task<Product?> GetWithDetailsAsync(int id) =>
             await _dbSet
                 .Include(p => p.Category)
