@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Menu;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
@@ -25,6 +26,8 @@ namespace Infrastructure.Data
         public DbSet<SupportMessage> SupportMessages{ get; set; }  = null!;
         public DbSet<FlashSale> FlashSales { get; set; } = null!;
         public DbSet<FlashSaleItem> FlashSaleItems { get; set; } = null!;
+        public DbSet<Menu> Menus { get; set; } = null!;
+        public DbSet<MenuItem> MenuItems { get; set; } = null!;
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
