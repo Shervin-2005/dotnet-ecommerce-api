@@ -248,6 +248,86 @@ namespace Infrastructure.Migrations
                     b.ToTable("FlashSaleItems");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Menu.Menu", b =>
+                {
+                    b.Property<int>("MenuId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MenuId"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("MenuId");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("Menus");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Menu.MenuItem", b =>
+                {
+                    b.Property<int>("MenuItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MenuItemId"));
+
+                    b.Property<int?>("BrandId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MenuId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ParentMenuItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TagId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.HasKey("MenuItemId");
+
+                    b.HasIndex("MenuId");
+
+                    b.HasIndex("ParentMenuItemId");
+
+                    b.ToTable("MenuItems");
+                });
+
             modelBuilder.Entity("Domain.Entities.OfferCode", b =>
                 {
                     b.Property<int>("OfferCodeId")
@@ -1202,6 +1282,24 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Menu.MenuItem", b =>
+                {
+                    b.HasOne("Domain.Entities.Menu.Menu", "Menu")
+                        .WithMany("Items")
+                        .HasForeignKey("MenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Menu.MenuItem", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentMenuItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Menu");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("Domain.Entities.OfferCodeUsage", b =>
                 {
                     b.HasOne("Domain.Entities.OfferCode", "OfferCode")
@@ -1484,6 +1582,16 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.FlashSale", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Menu.Menu", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Menu.MenuItem", b =>
+                {
+                    b.Navigation("Children");
                 });
 
             modelBuilder.Entity("Domain.Entities.OfferCode", b =>
