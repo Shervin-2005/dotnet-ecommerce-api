@@ -3,6 +3,7 @@ using Application.Interfaces.Cart;
 using Application.Interfaces.Category;
 using Application.Interfaces.Common;
 using Application.Interfaces.FlashSale;
+using Application.Interfaces.Menu;
 using Application.Interfaces.OfferCode;
 using Application.Interfaces.Order;
 using Application.Interfaces.Payment;
@@ -11,6 +12,7 @@ using Application.Interfaces.Review;
 using Application.Interfaces.SupportChat;
 using Application.Interfaces.UserAndAuth;
 using Infrastructure.Data;
+using Infrastructure.Repositories.Menu;
 
 namespace Infrastructure.Repositories
 {
@@ -40,6 +42,8 @@ namespace Infrastructure.Repositories
         private ISupportConversationRepository _supportConversations;
         private  ISupportMessageRepository _supportMessages;
         private IFlashSaleRepository? _flashSales;
+        private IMenuRepository? _menus;
+        private IMenuItemRepository? _menuItems;
         
         public UnitOfWork(AppDbContext context)
         {
@@ -69,6 +73,8 @@ namespace Infrastructure.Repositories
         public ISupportConversationRepository SupportConversations => _supportConversations ??= new SupportConversationRepository(_context);
         public ISupportMessageRepository SupportMessages => _supportMessages ??= new SupportMessageRepository(_context);
         public IFlashSaleRepository FlashSales => _flashSales ??= new FlashSaleRepository(_context);
+        public IMenuRepository Menus => _menus ??= new MenuRepository(_context);
+        public IMenuItemRepository MenuItems => _menuItems ??= new MenuItemRepository(_context);
         public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
         public void Dispose() => _context.Dispose();
     }

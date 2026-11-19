@@ -2,6 +2,7 @@
 using Application.Interfaces.Cart;
 using Application.Interfaces.Category;
 using Application.Interfaces.FlashSale;
+using Application.Interfaces.Menu;
 using Application.Interfaces.OfferCode;
 using Application.Interfaces.Order;
 using Application.Interfaces.Payment;
@@ -37,6 +38,8 @@ namespace Application.Interfaces.Common
         ISupportConversationRepository SupportConversations { get; }
         ISupportMessageRepository SupportMessages { get; }
         IFlashSaleRepository FlashSales { get; }
+        IMenuRepository Menus { get; }
+        IMenuItemRepository MenuItems { get; }
         Task<int> SaveChangesAsync();
     }
 }
