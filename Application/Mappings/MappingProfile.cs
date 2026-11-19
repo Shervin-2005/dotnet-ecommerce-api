@@ -7,9 +7,11 @@ using Application.DTOs.Payment;
 using Application.DTOs.UserAndAuth;
 using Application.DTOs.Brand;
 using Application.DTOs.FlashSale;
+using Application.DTOs.Menu;
 using Application.DTOs.OfferCode;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Entities.Menu;
 
 namespace Application.Mappings
 {
@@ -136,6 +138,16 @@ namespace Application.Mappings
             CreateMap<FlashSale, FlashSaleDto>();
             CreateMap<UpdateFlashSaleDto, FlashSale>();
             CreateMap<FlashSaleItem, FlashSaleItemDto>();
+            
+            //Menu
+            CreateMap<CreateMenuDto, Menu>();
+            CreateMap<Menu, MenuDto>();
+            CreateMap<UpdateMenuDto, Menu>();
+            
+            //MenuItem
+            CreateMap<CreateMenuItemDto, MenuItem>();
+            CreateMap<MenuItem, MenuItemDto>();
+            CreateMap<UpdateMenuItemDto, MenuItem>();
         }
     }
 }
