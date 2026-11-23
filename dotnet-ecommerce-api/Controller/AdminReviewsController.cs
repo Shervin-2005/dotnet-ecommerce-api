@@ -1,3 +1,4 @@
+using Application.DTOs.Common;
 using Application.DTOs.Review;
 using Application.Interfaces.Review;
 using Domain.Enums;
@@ -11,15 +12,42 @@ public class AdminReviewsController : BaseController
 {
     private readonly IReviewService _reviewService;
 
+    
     public AdminReviewsController(IReviewService reviewService)
     {
         _reviewService = reviewService;
     }
 
-    [HttpGet("pending")]
-    public async Task<ActionResult<IEnumerable<ReviewDto>>> GetPending()
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<ReviewDto>>> GetAll([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
     {
-        var reviews = await _reviewService.GetPendingAsync();
+        var reviews = await _reviewService.GetAllAsync(request, cancellationToken);
+
+        return Ok(reviews);
+    }
+    
+    [HttpGet("approved")]
+    public async Task<ActionResult<PagedResult<ReviewDto>>> GetAllApproved([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
+    {
+        var reviews = await _reviewService.GetAllApprovedAsync(request, cancellationToken);
+
+        return Ok(reviews);
+    }
+    
+    [HttpGet("pending")]
+    public async Task<ActionResult<PagedResult<ReviewDto>>> GetAllPending([FromQuery] PaginationRequest request,CancellationToken cancellationToken)
+    {
+        var reviews = await _reviewService.GetAllPendingAsync(
+            request,
+            cancellationToken);
+
+        return Ok(reviews);
+    }
+    
+    [HttpGet("rejected")]
+    public async Task<ActionResult<PagedResult<ReviewDto>>> GetAllRejected([FromQuery] PaginationRequest request, CancellationToken cancellationToken)
+    {
+        var reviews = await _reviewService.GetAllRejectedAsync(request, cancellationToken);
 
         return Ok(reviews);
     }
