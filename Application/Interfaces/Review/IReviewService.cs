@@ -13,7 +13,8 @@ namespace Application.Interfaces.Review
         Task<IEnumerable<ReviewDto>> GetByProductAsync(int productId);
         Task<ReviewDto> CreateAsync(int productId, int userId, CreateReviewDto dto);
         Task<ReviewActionResult> UpdateAsync(int reviewId, int userId, UpdateReviewDto dto);
-        Task<ReviewActionResult> DeleteAsync(int reviewId, int userId, bool isAdmin);
+        Task<ReviewActionResult> DeleteAsync(int reviewId, int userId);
+        Task<ReviewActionResult> AdminDeleteAsync(int reviewId);
         Task<ReviewActionResult> ApproveAsync(int reviewId);
         Task<ReviewActionResult> RejectAsync(int reviewId);
     }

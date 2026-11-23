@@ -95,14 +95,35 @@ namespace Application.Services
             return ReviewActionResult.Success;
         }
 
-        public async Task<ReviewActionResult> DeleteAsync(int reviewId, int userId, bool isAdmin)
+        public async Task<ReviewActionResult> DeleteAsync(int reviewId, int userId)
         {
             var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);
-            if (review is null) return ReviewActionResult.NotFound;
-            if (!isAdmin && review.UserId != userId) return ReviewActionResult.Forbidden;
 
+            if (review is null)
+                return ReviewActionResult.NotFound;
+
+            if (review.UserId != userId)
+                return ReviewActionResult.Forbidden;
+
+            return await DeleteReviewAsync(review);
+        }
+
+        public async Task<ReviewActionResult> AdminDeleteAsync(int reviewId)
+        {
+            var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);
+
+            if (review is null)
+                return ReviewActionResult.NotFound;
+
+            return await DeleteReviewAsync(review);
+        }
+
+        private async Task<ReviewActionResult> DeleteReviewAsync(ProductReview review)
+        {
             _unitOfWork.Reviews.Delete(review);
+
             await _unitOfWork.SaveChangesAsync();
+
             return ReviewActionResult.Success;
         }
         
