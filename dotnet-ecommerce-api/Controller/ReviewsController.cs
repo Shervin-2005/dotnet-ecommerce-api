@@ -48,10 +48,10 @@ namespace dotnet_ecommerce_api.Controller
 
         [Authorize]
         [HttpDelete("{reviewId:int}")]
-        public async Task<IActionResult> Delete(int productId, int reviewId)
+        public async Task<IActionResult> Delete(int reviewId)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var result = await _reviewService.DeleteAsync(reviewId, GetUserId(), isAdmin);
+            var result = await _reviewService.DeleteAsync(reviewId, GetUserId());
+
             return result switch
             {
                 ReviewActionResult.Success => NoContent(),

@@ -79,4 +79,17 @@ public class AdminReviewsController : BaseController
             _ => BadRequest()
         };
     }
+    
+    [HttpDelete("{reviewId:int}")]
+    public async Task<IActionResult> Delete(int reviewId)
+    {
+        var result = await _reviewService.AdminDeleteAsync(reviewId);
+
+        return result switch
+        {
+            ReviewActionResult.Success => NoContent(),
+            ReviewActionResult.NotFound => NotFound(),
+            _ => BadRequest()
+        };
+    }
 }
