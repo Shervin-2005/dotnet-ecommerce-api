@@ -1,5 +1,5 @@
+using Application.DTOs.Common;
 using Application.DTOs.Review;
-using Application.Interfaces;
 using Application.Interfaces.Common;
 using Application.Interfaces.Review;
 using AutoMapper;
@@ -20,6 +20,33 @@ namespace Application.Services
             _mapper = mapper;
         }
 
+        public async Task<PagedResult<ReviewDto>> GetAllAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            var result = await _unitOfWork.Reviews.GetAllPagedAsync(request, cancellationToken);
+
+            return new PagedResult<ReviewDto>
+            {
+                Items = _mapper.Map<List<ReviewDto>>(result.Items),
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
+        }
+        public Task<PagedResult<ReviewDto>> GetAllPendingAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            return GetByStatusAsync(ReviewStatus.Pending, request, cancellationToken);
+        }
+
+        public Task<PagedResult<ReviewDto>> GetAllApprovedAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            return GetByStatusAsync(ReviewStatus.Approved, request, cancellationToken);
+        }
+
+        public Task<PagedResult<ReviewDto>> GetAllRejectedAsync(PaginationRequest request, CancellationToken cancellationToken = default)
+        {
+            return GetByStatusAsync(ReviewStatus.Rejected, request, cancellationToken);
+        }
+        
         public async Task<IEnumerable<ReviewDto>> GetByProductAsync(int productId)
         {
             var reviews = await _unitOfWork.Reviews.GetByProductAsync(productId);
@@ -79,13 +106,6 @@ namespace Application.Services
             return ReviewActionResult.Success;
         }
         
-        public async Task<IEnumerable<ReviewDto>> GetPendingAsync()
-        {
-            var reviews = await _unitOfWork.Reviews.GetPendingAsync();
-
-            return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
-        }
-        
         public async Task<ReviewActionResult> ApproveAsync(int reviewId)
         {
             var review = await _unitOfWork.Reviews.GetByIdAsync(reviewId);
@@ -124,6 +144,19 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return ReviewActionResult.Success;
+        }
+        
+        private async Task<PagedResult<ReviewDto>> GetByStatusAsync(ReviewStatus status, PaginationRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _unitOfWork.Reviews.GetByStatusPagedAsync(status, request, cancellationToken);
+
+            return new PagedResult<ReviewDto>
+            {
+                Items = _mapper.Map<List<ReviewDto>>(result.Items),
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount
+            };
         }
     }
 }
